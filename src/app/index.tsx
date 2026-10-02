@@ -1,26 +1,22 @@
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import supabase from '~/api/supabase/client';
+import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import Logo from '@/components/Logo';
 
-export default function Home() {
-  const [message, setMessage] = useState('Testing Supabase...');
-
-  useEffect(() => {
-    supabase
-      .from('sites')
-      .select('name')
-      .then(({ data, error }) => {
-        if (error) setMessage(`Error: ${error.message}`);
-        else
-          setMessage(
-            `Found ${data.length} sites: ${data.map(s => s.name).join(', ')}`,
-          );
-      });
-  }, []);
-
+export default function App() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
-      <Text>{message}</Text>
+    <View style={styles.container}>
+      <Logo />
+      <Text>Open up src/app/index.tsx to start working on your app!</Text>
+      <StatusBar style="auto" />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
