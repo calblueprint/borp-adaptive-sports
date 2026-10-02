@@ -11,12 +11,13 @@
     "jsx": "react-native",
     "lib": ["ESNext", "DOM"],
     "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"],
       "~/*": ["./*"]
     }
   },
   "extends": "expo/tsconfig.base",
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./graphics.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "api/**/*.ts", "./graphics.d.ts"],
   "exclude": ["node_modules"]
 }
