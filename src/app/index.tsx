@@ -11,7 +11,10 @@ export default function Home() {
       .select('name')
       .then(({ data, error }) => {
         if (error) setMessage(`Error: ${error.message}`);
-        else setMessage(`Found ${data.length} sites: ${data.map((s) => s.name).join(', ')}`);
+        else
+          setMessage(
+            `Found ${data.length} sites: ${data.map(s => s.name).join(', ')}`,
+          );
       });
   }, []);
 
