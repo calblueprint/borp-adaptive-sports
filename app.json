@@ -23,6 +23,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow BORP Adaptive Sports to capture your location for an accessibility assessment."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/bp-splash.png",
