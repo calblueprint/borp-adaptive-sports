@@ -25,6 +25,7 @@
     "expo-linking": "~57.0.10",
     "expo-location": "~57.0.20",
     "expo-router": "~57.0.22",
+    "expo-sensors": "~57.0.3",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

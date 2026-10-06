@@ -29,6 +29,12 @@
         }
       ],
       [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow BORP Adaptive Sports to record device motion during a slope scan."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/bp-splash.png",
