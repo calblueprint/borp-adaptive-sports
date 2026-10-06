@@ -1,71 +1,55 @@
-# Mobile Application Template
+# BORP Adaptive Sports
 
-### Overview
+Expo / React Native app with basic Supabase email and password authentication.
 
-This is a template for building mobile applications using an Expo and React-Native. It provides eslint, typescript, and prettier configs, as well as git hooks, github actions, and PR templates.
+## Setup
 
-**Note: This template is a work in progress. Code formatting configurations are opinionated and shouldn't be treated as truth.**
+1. Install dependencies with `pnpm install`.
+2. The existing `.env` contains `EXPO_PUBLIC_SUPABASE_URL` and
+   `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for the Supabase project. Use a
+   publishable (or legacy anon) key, never a service-role key.
+3. Enable the Email auth provider in Supabase. If Confirm Email is enabled, users
+   must confirm through email before logging in. Configure the project's Site URL
+   to a valid confirmation destination. This scaffold does not handle confirmation
+   deep links or automatically sign in from the email link.
+4. Run `pnpm start` and open the app on an iOS or Android device or simulator.
+   Restart Expo after changing `.env`.
 
-### Navigation
+## Structure
 
-**As of 8/20/2024**, this repo does not have a navigation framework configured. The main navigation frameworks supported by Expo (previously used in Blueprint projects) are [React Navigation](https://reactnavigation.org/) and [Expo Router](https://docs.expo.dev/router/introduction/):
+- `api/supabase/client.ts`: single Supabase client and persisted session storage.
+- `src/features/auth/AuthProvider.tsx`: restoration, auth events, and foreground
+  token refresh. `useAuth()` gives screens the current session.
+- `src/features/auth/AuthForm.tsx`: shared form, validation, loading and error states.
+- `src/app/(auth)/`: login and sign-up screens.
+- `src/app/(app)/`: protected placeholder home and logout.
+- `src/app/_layout.tsx`: provider and route protection; auth events update navigation.
 
-1. (Preferred) React Navigation provides a **stack-based navigation model**, allowing screens to be pushed onto and popped out of a navigation stack. 
-    1. **NOTE: This framework provides more flexibility at the expense of more boilerplate code. However, being the more popular option, there is significant documentation and examples of mobile projects using React Navigation online.**
-2. Expo Router uses a **file-based router** for React Native and web applications. This framework allows applications to be accessible across platforms (iOS, Android, Web). When a file is added to the app directory, the file automatically becomes a route in your navigation. 
-    1. **NOTE: Expo Router is built on top of React Navigation and was released more recently. It may be easier to use out of the box, but it has rigid opinions regarding certain navigation features.**  
+Sessions survive closing the app. Startup reads the saved session before attempting
+refresh, so returning users can open home offline even with an expired access token.
+Signing up, logging in, and accessing server data require a connection. Invalid or
+revoked sessions are cleared when Supabase detects them online. Logout uses the
+local scope (this device).
 
-### Backend
+Saved sessions control local navigation; Supabase validates tokens for server
+requests. Future database tables must use Row Level Security policies. This
+scaffold does not cache application data for offline use.
 
-**As of 8/20/2024**, this template is not connected to a backend framework. Blueprint projects typically use Supabase backend/databases. See past mobile projects for examples.
+## Validation
 
----
-## Getting Started
+Run `pnpm run typecheck` and `pnpm run lint:check`.
 
-### Prerequisites
+Manual device checklist (use a test account):
 
-Check your installation of `npm` and `node`:
+1. Open signed out: login appears. Try empty fields and incorrect credentials.
+2. Create an account. With confirmation enabled, confirm the email and log in;
+   with confirmation disabled, home should open immediately.
+3. Log in: home displays your email. Back navigation must not reopen auth screens.
+4. Force-close and reopen: home should appear without logging in again.
+5. Disable networking and reopen. Repeat after the access token expires: home
+   should still open. Reconnect and verify refresh succeeds.
+6. Log out online: login appears. Reopening must stay signed out, and direct
+   navigation to home must not bypass login.
 
-```sh
-node -v
-npm -v
-```
-
-We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) (for Mac) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows) to install Node.js and npm. See [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-
-### Installation
-
-1. Fork/copy the repo.
-    1. [GitHub: Cloning a Repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository)
-    2. [GitHub: Generating SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-
-2. Install project dependencies. This command installs all packages from [`package.json`](package.json).
-      ```sh
-      # installs the pnpm tool itself — only needed once per machine
-      npm install -g pnpm
-      # installs this project's dependencies via pnpm
-      pnpm install 
-      ```
-3. [in progress...] Set up secrets 
-
-### Development environment
-
-- **[VSCode](https://code.visualstudio.com/) (recommended)**
-  1. Open the project in VSCode.
-  2. Install recommended workspace VSCode extensions. You should see a pop-up on the bottom right to "install the recommended extensions for this repository".
-
-### Running the app
-
-1. In the project directory, run:
-   ```shell
-    npx expo start
-   ```
-2. [Download Expo Go](https://docs.expo.dev/get-started/installation/#2-expo-go-app-for-android-and) on your phone, **connect to same network as your laptop**, and use your phone camera to scan the QR code displayed in the command line.
-
-### Development tools
-
-View the list of development scripts in the `package.json` file. Each script can be run through the terminal in the root of the project directory using the command below:
-
-```sh
-npm run <insert script name here>
-```
+References: [Supabase React Native auth quickstart](https://supabase.com/docs/guides/auth/quickstarts/react-native)
+and [Expo Router protected routes](https://docs.expo.dev/router/advanced/protected/).
