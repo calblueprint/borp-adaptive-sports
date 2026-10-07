@@ -35,6 +35,13 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow BORP Adaptive Sports to capture ramp photos for an accessibility assessment.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/bp-splash.png",

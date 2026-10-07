@@ -2,6 +2,7 @@ import type { DeviceMotionMeasurement } from 'expo-sensors';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -9,6 +10,8 @@ import {
   Text,
   View,
 } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Directory, File, Paths } from 'expo-file-system';
 import * as Location from 'expo-location';
 import { DeviceMotion } from 'expo-sensors';
 import { StatusBar } from 'expo-status-bar';
@@ -20,6 +23,11 @@ const MAX_MOTION_SAMPLES = 1_200;
 const MAX_MOTION_SESSIONS = 10;
 const MOTION_SAMPLE_INTERVAL_MS = 100;
 const MOTION_STORAGE_KEY = 'slope-motion-sessions';
+const CAMERA_CAPTURE_STORAGE_KEY = 'slope-camera-captures';
+const MAX_CAMERA_CAPTURES = 10;
+const STILL_LINEAR_ACCELERATION_MAX = 0.35;
+const STILL_ROTATION_RATE_MAX = 4;
+const STILLNESS_REQUIRED_MS = 1_000;
 
 type GpsCapture = {
   accuracy: number | null;
@@ -30,8 +38,7 @@ type GpsCapture = {
   timeToFixMs: number;
 };
 
-type MotionSample = {
-  elapsedMs: number;
+type MotionSnapshot = {
   gravity: { x: number; y: number; z: number };
   linearAccelerationMagnitude: number | null;
   orientation: number;
@@ -39,10 +46,22 @@ type MotionSample = {
   rotationRateMagnitude: number | null;
 };
 
+type MotionSample = MotionSnapshot & {
+  elapsedMs: number;
+};
+
 type MotionSession = {
   durationMs: number;
   recordedAt: string;
   samples: MotionSample[];
+};
+
+type CameraCapture = {
+  capturedAt: string;
+  height: number;
+  motion: MotionSnapshot;
+  uri: string;
+  width: number;
 };
 
 function formatAccuracy(accuracy: number | null) {
@@ -54,15 +73,13 @@ function magnitude(x: number, y: number, z: number) {
   return Math.sqrt(x ** 2 + y ** 2 + z ** 2);
 }
 
-function toMotionSample(
+function toMotionSnapshot(
   measurement: DeviceMotionMeasurement,
-  startedAt: number,
-): MotionSample {
+): MotionSnapshot {
   const linearAcceleration = measurement.acceleration;
   const rotationRate = measurement.rotationRate;
 
   return {
-    elapsedMs: Date.now() - startedAt,
     gravity: {
       x: measurement.accelerationIncludingGravity.x,
       y: measurement.accelerationIncludingGravity.y,
@@ -87,10 +104,35 @@ function toMotionSample(
   };
 }
 
+function toMotionSample(
+  measurement: DeviceMotionMeasurement,
+  startedAt: number,
+): MotionSample {
+  return {
+    elapsedMs: Date.now() - startedAt,
+    ...toMotionSnapshot(measurement),
+  };
+}
+
+function isStill(snapshot: MotionSnapshot) {
+  return (
+    snapshot.linearAccelerationMagnitude !== null &&
+    snapshot.rotationRateMagnitude !== null &&
+    snapshot.linearAccelerationMagnitude <= STILL_LINEAR_ACCELERATION_MAX &&
+    snapshot.rotationRateMagnitude <= STILL_ROTATION_RATE_MAX
+  );
+}
+
 export default function App() {
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [capture, setCapture] = useState<GpsCapture | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [isCameraStill, setIsCameraStill] = useState(false);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isRecordingMotion, setIsRecordingMotion] = useState(false);
+  const [lastCameraCapture, setLastCameraCapture] =
+    useState<CameraCapture | null>(null);
   const [latestMotionSample, setLatestMotionSample] =
     useState<MotionSample | null>(null);
   const [lastMotionSession, setLastMotionSession] =
@@ -100,7 +142,17 @@ export default function App() {
     'Ready to record a slow handheld scan.',
   );
   const [motionSessionCount, setMotionSessionCount] = useState(0);
+  const [cameraCaptureCount, setCameraCaptureCount] = useState(0);
+  const [cameraMessage, setCameraMessage] = useState(
+    'Enable the camera to begin an offline three-angle scan.',
+  );
   const [savedCount, setSavedCount] = useState(0);
+  const cameraRef = useRef<CameraView>(null);
+  const cameraMotionSnapshotRef = useRef<MotionSnapshot | null>(null);
+  const cameraMotionSubscriptionRef = useRef<ReturnType<
+    typeof DeviceMotion.addListener
+  > | null>(null);
+  const stillSinceRef = useRef<number | null>(null);
   const motionSamplesRef = useRef<MotionSample[]>([]);
   const motionStartedAtRef = useRef<number | null>(null);
   const motionSubscriptionRef = useRef<ReturnType<
@@ -110,9 +162,77 @@ export default function App() {
   useEffect(() => {
     void loadSavedCount();
     void loadMotionSessionCount();
+    void loadCameraCaptures();
 
-    return () => motionSubscriptionRef.current?.remove();
+    return () => {
+      motionSubscriptionRef.current?.remove();
+      cameraMotionSubscriptionRef.current?.remove();
+    };
   }, []);
+
+  useEffect(() => {
+    if (!cameraPermission?.granted) return;
+
+    let isActive = true;
+
+    async function monitorCameraStability() {
+      try {
+        const isAvailable = await DeviceMotion.isAvailableAsync();
+        if (!isAvailable) {
+          throw new Error('Device motion is unavailable on this device.');
+        }
+
+        const permission = await DeviceMotion.requestPermissionsAsync();
+        if (!permission.granted) {
+          throw new Error('Motion permission was not granted.');
+        }
+
+        if (!isActive) return;
+
+        DeviceMotion.setUpdateInterval(MOTION_SAMPLE_INTERVAL_MS);
+        setCameraMessage(
+          'Hold the phone still for one second to enable capture.',
+        );
+        cameraMotionSubscriptionRef.current = DeviceMotion.addListener(
+          measurement => {
+            const nextSnapshot = toMotionSnapshot(measurement);
+            cameraMotionSnapshotRef.current = nextSnapshot;
+
+            const now = Date.now();
+            if (!isStill(nextSnapshot)) {
+              stillSinceRef.current = null;
+              setIsCameraStill(false);
+              return;
+            }
+
+            stillSinceRef.current ??= now;
+            setIsCameraStill(
+              now - stillSinceRef.current >= STILLNESS_REQUIRED_MS,
+            );
+          },
+        );
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Unknown motion-sensor error.';
+        setCameraMessage(
+          `Camera preview is ready, but stillness checks are unavailable: ${errorMessage}`,
+        );
+      }
+    }
+
+    void monitorCameraStability();
+
+    return () => {
+      isActive = false;
+      cameraMotionSubscriptionRef.current?.remove();
+      cameraMotionSubscriptionRef.current = null;
+      cameraMotionSnapshotRef.current = null;
+      stillSinceRef.current = null;
+      setIsCameraStill(false);
+    };
+  }, [cameraPermission?.granted]);
 
   async function loadSavedCount() {
     const storedCaptures = await AsyncStorage.getItem(CAPTURE_STORAGE_KEY);
@@ -191,6 +311,105 @@ export default function App() {
       JSON.stringify(updatedSessions),
     );
     setMotionSessionCount(updatedSessions.length);
+  }
+
+  async function loadCameraCaptures() {
+    const storedCaptures = await AsyncStorage.getItem(
+      CAMERA_CAPTURE_STORAGE_KEY,
+    );
+    if (!storedCaptures) return;
+
+    try {
+      const parsedCaptures: unknown = JSON.parse(storedCaptures);
+      if (Array.isArray(parsedCaptures)) {
+        const captures = parsedCaptures as CameraCapture[];
+        setCameraCaptureCount(captures.length);
+        setLastCameraCapture(captures[0] ?? null);
+      }
+    } catch {
+      setCameraMessage(
+        'Saved camera captures could not be read. New captures will replace them.',
+      );
+    }
+  }
+
+  async function saveCameraCapture(nextCapture: CameraCapture) {
+    const storedCaptures = await AsyncStorage.getItem(
+      CAMERA_CAPTURE_STORAGE_KEY,
+    );
+    let previousCaptures: CameraCapture[] = [];
+
+    if (storedCaptures) {
+      try {
+        const parsedCaptures: unknown = JSON.parse(storedCaptures);
+        if (Array.isArray(parsedCaptures))
+          previousCaptures = parsedCaptures as CameraCapture[];
+      } catch {
+        previousCaptures = [];
+      }
+    }
+
+    const updatedCaptures = [nextCapture, ...previousCaptures].slice(
+      0,
+      MAX_CAMERA_CAPTURES,
+    );
+    await AsyncStorage.setItem(
+      CAMERA_CAPTURE_STORAGE_KEY,
+      JSON.stringify(updatedCaptures),
+    );
+    setCameraCaptureCount(updatedCaptures.length);
+  }
+
+  async function captureCameraPhoto() {
+    const motion = cameraMotionSnapshotRef.current;
+
+    if (!cameraRef.current || !isCameraReady) {
+      setCameraMessage(
+        'Camera preview is still starting. Try again in a moment.',
+      );
+      return;
+    }
+
+    if (!isCameraStill || !motion) {
+      setCameraMessage('Hold the phone still for one second before capturing.');
+      return;
+    }
+
+    setIsTakingPhoto(true);
+
+    try {
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.7 });
+      const capturedAt = new Date();
+      const photoDirectory = new Directory(Paths.document, 'slope-captures');
+      photoDirectory.create({ idempotent: true, intermediates: true });
+
+      const sourcePhoto = new File(photo.uri);
+      const savedPhoto = new File(
+        photoDirectory,
+        `slope-${capturedAt.getTime()}.jpg`,
+      );
+      await sourcePhoto.copy(savedPhoto);
+
+      const nextCapture: CameraCapture = {
+        capturedAt: capturedAt.toISOString(),
+        height: photo.height,
+        motion,
+        uri: savedPhoto.uri,
+        width: photo.width,
+      };
+
+      await saveCameraCapture(nextCapture);
+      setLastCameraCapture(nextCapture);
+      setCameraMessage(
+        'Photo and matching motion snapshot saved locally. Shift position for the next overlapping angle.',
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown camera error.';
+      setCameraMessage(`Unable to capture photo: ${errorMessage}`);
+    } finally {
+      setIsTakingPhoto(false);
+    }
   }
 
   async function startMotionRecording() {
@@ -378,6 +597,112 @@ export default function App() {
           device.
         </Text>
 
+        <View style={styles.cameraSection}>
+          <Text style={styles.sectionTitle}>Camera scan proof</Text>
+          <Text style={styles.instructions}>
+            Capture three overlapping views of the ramp: center, then left and
+            right. Each photo stays on this device with the phone's gravity and
+            motion data at capture time.
+          </Text>
+
+          {!cameraPermission ? (
+            <ActivityIndicator color="#155EEF" />
+          ) : !cameraPermission.granted ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void requestCameraPermission()}
+              style={({ pressed }) => [
+                styles.captureButton,
+                pressed && styles.captureButtonPressed,
+              ]}
+            >
+              <Text style={styles.captureButtonText}>Enable camera</Text>
+            </Pressable>
+          ) : (
+            <>
+              <View style={styles.cameraFrame}>
+                <CameraView
+                  active
+                  facing="back"
+                  onCameraReady={() => setIsCameraReady(true)}
+                  onMountError={event =>
+                    setCameraMessage(
+                      `Unable to start camera preview: ${event.message}`,
+                    )
+                  }
+                  ref={cameraRef}
+                  style={styles.cameraPreview}
+                />
+              </View>
+
+              <Text
+                style={[
+                  styles.stabilityStatus,
+                  isCameraStill
+                    ? styles.stabilityStatusReady
+                    : styles.stabilityStatusWaiting,
+                ]}
+              >
+                {isCameraStill
+                  ? 'Steady — ready to capture'
+                  : 'Hold steady for one second'}
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                disabled={!isCameraReady || !isCameraStill || isTakingPhoto}
+                onPress={() => void captureCameraPhoto()}
+                style={({ pressed }) => [
+                  styles.cameraButton,
+                  (!isCameraReady ||
+                    !isCameraStill ||
+                    isTakingPhoto ||
+                    pressed) &&
+                    styles.captureButtonPressed,
+                ]}
+              >
+                {isTakingPhoto ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.captureButtonText}>
+                    Capture steady photo
+                  </Text>
+                )}
+              </Pressable>
+            </>
+          )}
+
+          <Text style={styles.message}>{cameraMessage}</Text>
+
+          {lastCameraCapture && (
+            <View style={styles.resultCard}>
+              <Image
+                source={{ uri: lastCameraCapture.uri }}
+                style={styles.photoPreview}
+              />
+              <Text style={styles.resultTitle}>Latest camera capture</Text>
+              <Text style={styles.resultValue}>
+                {lastCameraCapture.width} × {lastCameraCapture.height} pixels
+              </Text>
+              <Text style={styles.resultValue}>
+                Motion at capture: linear acceleration{' '}
+                {lastCameraCapture.motion.linearAccelerationMagnitude?.toFixed(
+                  2,
+                ) ?? 'Unavailable'}{' '}
+                m/s²; rotation rate{' '}
+                {lastCameraCapture.motion.rotationRateMagnitude?.toFixed(1) ??
+                  'Unavailable'}
+                °/s
+              </Text>
+            </View>
+          )}
+
+          <Text style={styles.logStatus}>
+            {cameraCaptureCount} of {MAX_CAMERA_CAPTURES} camera captures saved
+            locally.
+          </Text>
+        </View>
+
         <View style={styles.motionSection}>
           <Text style={styles.sectionTitle}>Motion scan probe</Text>
           <Text style={styles.instructions}>
@@ -516,6 +841,10 @@ const styles = StyleSheet.create({
     gap: 14,
     marginTop: 18,
   },
+  cameraSection: {
+    gap: 14,
+    marginTop: 18,
+  },
   sectionTitle: {
     color: '#182230',
     fontSize: 22,
@@ -527,5 +856,37 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     minHeight: 52,
+  },
+  cameraButton: {
+    alignItems: 'center',
+    backgroundColor: '#155EEF',
+    borderRadius: 10,
+    justifyContent: 'center',
+    minHeight: 52,
+  },
+  cameraFrame: {
+    backgroundColor: '#101828',
+    borderRadius: 12,
+    height: 320,
+    overflow: 'hidden',
+  },
+  cameraPreview: {
+    flex: 1,
+  },
+  photoPreview: {
+    alignSelf: 'stretch',
+    borderRadius: 8,
+    height: 180,
+    resizeMode: 'cover',
+  },
+  stabilityStatus: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  stabilityStatusReady: {
+    color: '#027A48',
+  },
+  stabilityStatusWaiting: {
+    color: '#B54708',
   },
 });
