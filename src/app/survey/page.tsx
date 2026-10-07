@@ -29,9 +29,17 @@ const QUESTIONS: Question[] = [
     label: 'Which region is this site in?',
     type: 'single_select',
     options: [
-      'North Coast', 'Shasta Cascade', 'Sacramento Valley', 'SF/Bay Area',
-      'South Bay', 'Gold Country', 'Monterey/Santa Cruz', 'Central Valley',
-      'Central Coast', 'High Sierra', 'Southern Coast',
+      'North Coast',
+      'Shasta Cascade',
+      'Sacramento Valley',
+      'SF/Bay Area',
+      'South Bay',
+      'Gold Country',
+      'Monterey/Santa Cruz',
+      'Central Valley',
+      'Central Coast',
+      'High Sierra',
+      'Southern Coast',
     ],
   },
 
@@ -70,8 +78,16 @@ const QUESTIONS: Question[] = [
     label: 'Which activities are available?',
     type: 'multi_select',
     options: [
-      'Cycling', 'Boating', 'Camping', 'Fishing', 'Docent tours', 'Hiking',
-      'Picnic', 'Swimming', 'Wildlife viewing', 'Good for families',
+      'Cycling',
+      'Boating',
+      'Camping',
+      'Fishing',
+      'Docent tours',
+      'Hiking',
+      'Picnic',
+      'Swimming',
+      'Wildlife viewing',
+      'Good for families',
     ],
   },
   {
@@ -94,8 +110,13 @@ const QUESTIONS: Question[] = [
     label: 'Which accessible facilities are available?',
     type: 'multi_select',
     options: [
-      'Accessible boat launch', 'Accessible restrooms', 'Benches',
-      'Fishing pier', 'Food', 'Picnic playground', 'Playground',
+      'Accessible boat launch',
+      'Accessible restrooms',
+      'Benches',
+      'Fishing pier',
+      'Food',
+      'Picnic playground',
+      'Playground',
       'Roll-in shower',
     ],
   },
@@ -162,7 +183,7 @@ export default function SurveyScreen() {
         <View key={sectionName} style={styles.section}>
           <Text style={styles.sectionTitle}>{sectionName}</Text>
 
-          {questions.map((q) => (
+          {questions.map(q => (
             <View key={q.column} style={styles.question}>
               <Text style={styles.label}>{q.label}</Text>
 
@@ -171,7 +192,7 @@ export default function SurveyScreen() {
                   {q.type === 'multi_select' && (
                     <Text style={styles.hint}>Check all that apply</Text>
                   )}
-                  {q.options.map((opt) => (
+                  {q.options.map(opt => (
                     <Text key={opt} style={styles.option}>
                       {q.type === 'multi_select' ? '☐ ' : '○ '}
                       {opt}
