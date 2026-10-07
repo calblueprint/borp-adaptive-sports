@@ -223,9 +223,7 @@ export default function App() {
       });
 
       setIsRecordingMotion(true);
-      setMotionMessage(
-        'Recording motion, hold the phone steady.',
-      );
+      setMotionMessage('Recording motion, hold the phone steady.');
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown motion-sensor error.';
