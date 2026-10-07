@@ -224,7 +224,7 @@ export default function App() {
 
       setIsRecordingMotion(true);
       setMotionMessage(
-        'Recording motion. Slowly scan the ramp while holding the phone steady.',
+        'Recording motion, hold the phone steady.',
       );
     } catch (error) {
       const errorMessage =
@@ -383,9 +383,7 @@ export default function App() {
         <View style={styles.motionSection}>
           <Text style={styles.sectionTitle}>Motion scan probe</Text>
           <Text style={styles.instructions}>
-            This records phone motion during a slow handheld ramp scan. It does
-            not measure terrain slope on its own; it supplies gravity and
-            stability data for the camera test.
+            Takes a motion sample from the device's sensors.
           </Text>
 
           <Pressable
