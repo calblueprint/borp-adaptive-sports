@@ -48,7 +48,7 @@ export default function App() {
       if (Array.isArray(parsedCaptures)) setSavedCount(parsedCaptures.length);
     } catch {
       setMessage(
-        'Saved GPS log could not be read. New captures will replace it.',
+        'Saved GPS log could not be read and will be replaced by new captures.',
       );
     }
   }
@@ -86,7 +86,7 @@ export default function App() {
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         throw new Error(
-          'Location Services are off. Enable them in iPhone Settings, then try again.',
+          'Location Services are off. Try again after enabling them in iPhone Settings.',
         );
       }
 
@@ -136,9 +136,8 @@ export default function App() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Offline GPS proof</Text>
         <Text style={styles.instructions}>
-          Go outdoors, turn on Airplane Mode, keep Location Services and Precise
-          Location enabled, then request a fresh fix. This screen makes no
-          network or Supabase requests.
+          Keep location services and Precise Location enabled for accurate GPS
+          captures.
         </Text>
 
         <Pressable
