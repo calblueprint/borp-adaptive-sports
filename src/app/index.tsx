@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import supabase from '~/api/supabase/client';
 
@@ -8,7 +9,10 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const { error } = await supabase.from('connection_test').select('*').limit(1);
+      const { error } = await supabase
+        .from('connection_test')
+        .select('*')
+        .limit(1);
       if (!error) setStatus('✅ Connected to Supabase');
       else if (error.code === 'PGRST205' || error.code === '42P01')
         setStatus('✅ Connected (test table not found, which is expected)');
@@ -20,11 +24,17 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{status}</Text>
+      <Link href="/trails">View Trail Data</Link>
       <StatusBar style="auto" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
