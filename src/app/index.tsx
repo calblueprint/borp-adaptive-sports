@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import supabase from '~/api/supabase/client';
-import { Link } from 'expo-router';
 
 export default function App() {
   const [status, setStatus] = useState('Checking Supabase...');
@@ -24,9 +24,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{status}</Text>
-      <Link href="/trails">
-        View Trail Data
-      </Link>
+      <Link href="/trails">View Trail Data</Link>
       <StatusBar style="auto" />
     </View>
   );
