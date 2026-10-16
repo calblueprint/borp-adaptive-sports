@@ -1,23 +1,33 @@
-# Mobile Application Template
+# BORP Adaptive Sports
 
 ### Overview
 
-This is a template for building mobile applications using an Expo and React-Native. It provides eslint, typescript, and prettier configs, as well as git hooks, github actions, and PR templates.
+BORP Adaptive Sports and Recreation, based in Berkeley, CA, has for 50 years provided adaptive sports, fitness, and recreation programs for youth and adults with mobility and vision disabilities. Among its programs is Access California (Access CA), a roughly 20-year-old initiative that publishes detailed accessibility guides for outdoor sites — trails, beaches, parks, and gardens — across California, so that people with disabilities can know before they travel whether a site will work for them.
 
-**Note: This template is a work in progress. Code formatting configurations are opinionated and shouldn't be treated as truth.**
+This app moves the whole field-collection process onto a phone:
 
-### Navigation
-
-**As of 8/20/2024**, this repo does not have a navigation framework configured. The main navigation frameworks supported by Expo (previously used in Blueprint projects) are [React Navigation](https://reactnavigation.org/) and [Expo Router](https://docs.expo.dev/router/introduction/):
-
-1. (Preferred) React Navigation provides a **stack-based navigation model**, allowing screens to be pushed onto and popped out of a navigation stack. 
-    1. **NOTE: This framework provides more flexibility at the expense of more boilerplate code. However, being the more popular option, there is significant documentation and examples of mobile projects using React Navigation online.**
-2. Expo Router uses a **file-based router** for React Native and web applications. This framework allows applications to be accessible across platforms (iOS, Android, Web). When a file is added to the app directory, the file automatically becomes a route in your navigation. 
-    1. **NOTE: Expo Router is built on top of React Navigation and was released more recently. It may be easier to use out of the box, but it has rigid opinions regarding certain navigation features.**  
+1. Guided surveys. Any surveyor collects the same structured data, one question at a time, following their path through a site (parking → entrance → trail).
+2. Offline-first. Everything works with no cell service and syncs when the device is back online.
+3. Review and publish. Submitted surveys go to an admin review queue, and only approved records are published to the Access California site.
 
 ### Backend
 
-**As of 8/20/2024**, this template is not connected to a backend framework. Blueprint projects typically use Supabase backend/databases. See past mobile projects for examples.
+The app uses a hosted Supabase project (Postgres, auth, and file storage).
+
+#### How the app talks to Supabase
+
+```javascript
+api/supabase/client.ts
+```
+creates the single shared Supabase client. It reads the env vars above and saves the login session to device storage (AsyncStorage) so users stay signed in. Import it anywhere with:
+
+```javascript
+import supabase from '~/api/supabase/client';
+```
+
+### Schema
+
+TODO
 
 ---
 ## Getting Started
@@ -33,11 +43,19 @@ npm -v
 
 We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) (for Mac) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows) to install Node.js and npm. See [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 
+Expo Go on your phone, or an iOS simulator / Android emulator
+
 ### Installation
 
 1. Fork/copy the repo.
-    1. [GitHub: Cloning a Repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository)
-    2. [GitHub: Generating SSH keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+    1. Run:
+    ```shell
+    git clone https://github.com/calblueprint/borp-adaptive-sports.git
+    ```
+    2. Navigate to the correct directory:
+    ```shell
+    cd borp-adaptive-sports
+    ```
 
 2. Install project dependencies. This command installs all packages from [`package.json`](package.json).
       ```sh
