@@ -25,12 +25,12 @@ const sections = QUESTIONS.reduce<Record<string, QuestionData[]>>(
 export default function SurveyScreen() {
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [surveyId, setSurveyId] = useState<string | undefined>();
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  // store answer + check it right away so errors show as user types
   const setAnswer = (q: QuestionData, value: AnswerValue) => {
+    setSaved(false);
     setAnswers(prev => ({ ...prev, [q.column]: value }));
     const error = validateAnswer(q, value);
     setErrors(prev => {
@@ -41,7 +41,6 @@ export default function SurveyScreen() {
     });
   };
 
-  // check everything -> save
   const handleSave = async () => {
     const found = validateAll(answers);
     setErrors(found);
@@ -51,7 +50,8 @@ export default function SurveyScreen() {
     }
     setSaving(true);
     try {
-      setSurveyId(await saveDraftSurvey(toRow(answers), surveyId));
+      await saveDraftSurvey(toRow(answers));
+      setSaved(true);
       setMessage('Draft saved.');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not save draft.');
@@ -80,7 +80,11 @@ export default function SurveyScreen() {
           </View>
         ))}
 
-        <Button title="Save draft" onPress={handleSave} disabled={saving} />
+        <Button
+          title="Save draft"
+          onPress={handleSave}
+          disabled={saving || saved}
+        />
         {message !== '' && <Text style={styles.message}>{message}</Text>}
       </ScrollView>
     </SafeAreaView>

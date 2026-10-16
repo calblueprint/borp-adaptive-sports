@@ -17,36 +17,17 @@ const TEST_SITE_ID = '45b8274f-04e0-413b-8a04-9ff9b2a4eb4f';
 
 export async function saveDraftSurvey(
   row: Record<string, unknown>,
-  surveyId?: string,
-): Promise<string> {
+): Promise<void> {
   const now = new Date().toISOString();
 
-  if (surveyId) {
-    const { data, error } = await supabase
-      .from('surveys')
-      .update({ ...row, updated_at: now })
-      .eq('id', surveyId)
-      .select('id');
-    if (error) throw new Error(`Error saving draft: ${error.message}`);
-    if (!data?.length) {
-      throw new Error('Draft was not updated. Check permissions.');
-    }
-    return surveyId;
-  }
-
-  const { data, error } = await supabase
-    .from('surveys')
-    .insert({
-      ...row,
-      site_id: TEST_SITE_ID,
-      surveyor_id: TEST_USER_ID,
-      status: 'draft',
-      version: 1,
-      created_at: now,
-      updated_at: now,
-    })
-    .select('id')
-    .single();
+  const { error } = await supabase.from('surveys').insert({
+    ...row,
+    site_id: TEST_SITE_ID,
+    surveyor_id: TEST_USER_ID,
+    status: 'draft',
+    version: 1,
+    created_at: now,
+    updated_at: now,
+  });
   if (error) throw new Error(`Error saving draft: ${error.message}`);
-  return data.id;
 }
