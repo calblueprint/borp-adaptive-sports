@@ -25,9 +25,12 @@ const MOTION_SAMPLE_INTERVAL_MS = 100;
 const MOTION_STORAGE_KEY = 'slope-motion-sessions';
 const CAMERA_CAPTURE_STORAGE_KEY = 'slope-camera-captures';
 const MAX_CAMERA_CAPTURES = 10;
-const STILL_LINEAR_ACCELERATION_MAX = 0.35;
-const STILL_ROTATION_RATE_MAX = 4;
-const STILLNESS_REQUIRED_MS = 1_000;
+const STABILITY_WINDOW_MS = 800;
+const MIN_STABILITY_SAMPLES = 6;
+const MAX_AVERAGE_LINEAR_ACCELERATION = 0.7;
+const MAX_AVERAGE_ROTATION_RATE = 12;
+const MAX_PEAK_LINEAR_ACCELERATION = 1.6;
+const MAX_PEAK_ROTATION_RATE = 24;
 
 type GpsCapture = {
   accuracy: number | null;
@@ -62,6 +65,12 @@ type CameraCapture = {
   motion: MotionSnapshot;
   uri: string;
   width: number;
+};
+
+type StabilityReading = {
+  linearAccelerationMagnitude: number;
+  recordedAtMs: number;
+  rotationRateMagnitude: number;
 };
 
 function formatAccuracy(accuracy: number | null) {
@@ -114,12 +123,31 @@ function toMotionSample(
   };
 }
 
-function isStill(snapshot: MotionSnapshot) {
+function isStableWindow(readings: StabilityReading[]) {
+  if (readings.length < MIN_STABILITY_SAMPLES) return false;
+
+  const averageLinearAcceleration =
+    readings.reduce(
+      (total, reading) => total + reading.linearAccelerationMagnitude,
+      0,
+    ) / readings.length;
+  const averageRotationRate =
+    readings.reduce(
+      (total, reading) => total + reading.rotationRateMagnitude,
+      0,
+    ) / readings.length;
+  const peakLinearAcceleration = Math.max(
+    ...readings.map(reading => reading.linearAccelerationMagnitude),
+  );
+  const peakRotationRate = Math.max(
+    ...readings.map(reading => reading.rotationRateMagnitude),
+  );
+
   return (
-    snapshot.linearAccelerationMagnitude !== null &&
-    snapshot.rotationRateMagnitude !== null &&
-    snapshot.linearAccelerationMagnitude <= STILL_LINEAR_ACCELERATION_MAX &&
-    snapshot.rotationRateMagnitude <= STILL_ROTATION_RATE_MAX
+    averageLinearAcceleration <= MAX_AVERAGE_LINEAR_ACCELERATION &&
+    averageRotationRate <= MAX_AVERAGE_ROTATION_RATE &&
+    peakLinearAcceleration <= MAX_PEAK_LINEAR_ACCELERATION &&
+    peakRotationRate <= MAX_PEAK_ROTATION_RATE
   );
 }
 
@@ -152,7 +180,7 @@ export default function App() {
   const cameraMotionSubscriptionRef = useRef<ReturnType<
     typeof DeviceMotion.addListener
   > | null>(null);
-  const stillSinceRef = useRef<number | null>(null);
+  const cameraStabilityReadingsRef = useRef<StabilityReading[]>([]);
   const motionSamplesRef = useRef<MotionSample[]>([]);
   const motionStartedAtRef = useRef<number | null>(null);
   const motionSubscriptionRef = useRef<ReturnType<
@@ -191,7 +219,7 @@ export default function App() {
 
         DeviceMotion.setUpdateInterval(MOTION_SAMPLE_INTERVAL_MS);
         setCameraMessage(
-          'Hold the phone still for one second to enable capture.',
+          'Hold the phone comfortably for a moment to enable capture. Small hand tremors are allowed.',
         );
         cameraMotionSubscriptionRef.current = DeviceMotion.addListener(
           measurement => {
@@ -199,16 +227,27 @@ export default function App() {
             cameraMotionSnapshotRef.current = nextSnapshot;
 
             const now = Date.now();
-            if (!isStill(nextSnapshot)) {
-              stillSinceRef.current = null;
+            const linearAcceleration = nextSnapshot.linearAccelerationMagnitude;
+            const rotationRate = nextSnapshot.rotationRateMagnitude;
+
+            if (linearAcceleration === null || rotationRate === null) {
+              cameraStabilityReadingsRef.current = [];
               setIsCameraStill(false);
               return;
             }
 
-            stillSinceRef.current ??= now;
-            setIsCameraStill(
-              now - stillSinceRef.current >= STILLNESS_REQUIRED_MS,
+            const readings = [
+              ...cameraStabilityReadingsRef.current,
+              {
+                linearAccelerationMagnitude: linearAcceleration,
+                recordedAtMs: now,
+                rotationRateMagnitude: rotationRate,
+              },
+            ].filter(
+              reading => now - reading.recordedAtMs <= STABILITY_WINDOW_MS,
             );
+            cameraStabilityReadingsRef.current = readings;
+            setIsCameraStill(isStableWindow(readings));
           },
         );
       } catch (error) {
@@ -229,7 +268,7 @@ export default function App() {
       cameraMotionSubscriptionRef.current?.remove();
       cameraMotionSubscriptionRef.current = null;
       cameraMotionSnapshotRef.current = null;
-      stillSinceRef.current = null;
+      cameraStabilityReadingsRef.current = [];
       setIsCameraStill(false);
     };
   }, [cameraPermission?.granted]);
@@ -371,7 +410,9 @@ export default function App() {
     }
 
     if (!isCameraStill || !motion) {
-      setCameraMessage('Hold the phone still for one second before capturing.');
+      setCameraMessage(
+        'Let the phone settle briefly before capturing. Small hand tremors are okay.',
+      );
       return;
     }
 
@@ -645,7 +686,7 @@ export default function App() {
               >
                 {isCameraStill
                   ? 'Steady — ready to capture'
-                  : 'Hold steady for one second'}
+                  : 'Settling motion…'}
               </Text>
 
               <Pressable
