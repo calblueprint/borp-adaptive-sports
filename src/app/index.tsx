@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import supabase from '~/api/supabase/client';
 
@@ -23,6 +24,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{status}</Text>
+      <Link href="/photo-test">Photo test</Link>
       <StatusBar style="auto" />
     </View>
   );
