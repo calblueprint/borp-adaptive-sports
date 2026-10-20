@@ -34,20 +34,6 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     return () => clearTimeout(timer);
   }, [seconds]);
 
-  function enterExistingCode() {
-    if (isSubmitting) return;
-    setError(null);
-    setMessage(null);
-    const trimmedEmail = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setError('Enter the email address that received the code first.');
-      return;
-    }
-    setSentEmail(trimmedEmail);
-    setPassword('');
-    setCode('');
-  }
-
   async function submit() {
     if (isSubmitting) return;
     setError(null);
@@ -76,11 +62,8 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
             password,
           });
       if (authError?.code === 'email_not_confirmed') {
-        setSentEmail(trimmedEmail);
-        setPassword('');
-        setCode('');
-        setMessage(
-          'Enter your email verification code, or request a new one below.',
+        setError(
+          'Your email is not verified. Complete account creation before logging in.',
         );
         return;
       }
@@ -110,7 +93,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   }
 
   async function resendConfirmation() {
-    if (isSubmitting || seconds > 0 || !sentEmail) return;
+    if (!isSignup || isSubmitting || seconds > 0 || !sentEmail) return;
     setError(null);
     setMessage(null);
     setIsSubmitting(true);
@@ -135,7 +118,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   }
 
   async function verifyCode() {
-    if (isSubmitting || !sentEmail) return;
+    if (!isSignup || isSubmitting || !sentEmail) return;
     setError(null);
     setMessage(null);
     const token = code.trim();
@@ -176,7 +159,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        {sentEmail ? (
+        {isSignup && sentEmail ? (
           <>
             <Text>Check your email</Text>
             <Text>Enter the verification code sent to {sentEmail}.</Text>
@@ -267,11 +250,6 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
               }
               disabled={isSubmitting}
               onPress={() => void submit()}
-            />
-            <Button
-              title="Already have a verification code?"
-              disabled={isSubmitting}
-              onPress={enterExistingCode}
             />
           </>
         )}
