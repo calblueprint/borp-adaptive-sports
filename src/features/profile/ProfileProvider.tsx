@@ -7,7 +7,10 @@ import {
   useState,
 } from 'react';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { fetchProfile } from '~/api/supabase/queries/profiles';
+import {
+  fetchProfile,
+  profileErrorMessage,
+} from '~/api/supabase/queries/profiles';
 
 type ProfileState = {
   userId: string;
@@ -39,13 +42,12 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         profile => {
           if (active) setState({ userId, profile, error: null });
         },
-        () => {
+        cause => {
           if (active)
             setState({
               userId,
               profile: null,
-              error:
-                'Unable to load your profile. Check your connection and try again.',
+              error: profileErrorMessage(cause),
             });
         },
       );

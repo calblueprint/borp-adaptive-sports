@@ -8,62 +8,91 @@ import {
   Text,
   TextInput,
 } from 'react-native';
+import ActionButton from '@/components/Button/Button';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import supabase from '~/api/supabase/client';
-import { createProfile } from '~/api/supabase/queries/profiles';
+import {
+  createProfile,
+  profileErrorMessage,
+} from '~/api/supabase/queries/profiles';
 
 export default function ProfileSetup() {
   const { session } = useAuth();
-  const { reload } = useProfile();
-  const [step, setStep] = useState<'password' | 'profile'>(
-    session?.user.user_metadata.profile_password_set ? 'profile' : 'password',
-  );
+  const { profile, reload } = useProfile();
+  const needsPassword =
+    session?.user.user_metadata.password_setup_required === true;
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('');
-  const [affiliation, setAffiliation] = useState('');
-  const [mobilityDevice, setMobilityDevice] = useState('');
+  const [name, setName] = useState(profile?.name ?? '');
+  const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number ?? '');
+  const [affiliation, setAffiliation] = useState(profile?.affiliation ?? '');
+  const [mobilityDevice, setMobilityDevice] = useState(
+    profile?.mobility_device ?? '',
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const validPassword =
-    password.length >= 10 && /[^a-zA-Z0-9\s]/.test(password);
 
   async function submit() {
     if (busy) return;
     setError(null);
-    if (step === 'password' && !validPassword) {
-      setError('Use at least 10 characters and a special character.');
+    if (needsPassword) {
+      if (password.length < 8) {
+        setError('Use at least 8 characters.');
+        return;
+      }
+      setBusy(true);
+      try {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password,
+          data: { password_setup_required: false },
+        });
+        if (passwordError) throw passwordError;
+        setPassword('');
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : 'Unable to set your password. Please try again.',
+        );
+      } finally {
+        setBusy(false);
+      }
       return;
     }
-    if (step === 'profile' && !name.trim()) {
+    if (!name.trim()) {
       setError('Enter your name.');
+      return;
+    }
+    const normalizedPhone = phoneNumber.replace(/[\s().-]/g, '');
+    if (!/^\+[1-9]\d{6,14}$/.test(normalizedPhone)) {
+      setError(
+        'Enter a valid phone number with its country code, for example +15105550123.',
+      );
       return;
     }
     setBusy(true);
     try {
-      if (step === 'password') {
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password,
-          data: { profile_password_set: true },
-        });
-        if (passwordError) throw passwordError;
-        setPassword('');
-        setStep('profile');
+      const details = {
+        name: name.trim(),
+        phone_number: normalizedPhone,
+        affiliation: affiliation.trim() || null,
+        mobility_device: mobilityDevice.trim() || null,
+      };
+      if (profile) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update(details)
+          .eq('id', profile.id)
+          .select('id')
+          .single();
+        if (updateError) throw updateError;
       } else {
-        await createProfile({
-          name: name.trim(),
-          affiliation: affiliation.trim() || null,
-          mobility_device: mobilityDevice.trim() || null,
-        });
-        reload();
+        await createProfile(details);
       }
+      reload();
     } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Unable to save. Please try again.',
-      );
+      setError(profileErrorMessage(cause));
     } finally {
       setBusy(false);
     }
@@ -94,9 +123,7 @@ export default function ProfileSetup() {
         keyboardShouldPersistTaps="handled"
       >
         <Text>
-          {step === 'password'
-            ? 'Your email is verified'
-            : 'We would love to know you'}
+          {needsPassword ? 'Your email is verified' : 'Complete your profile'}
         </Text>
         <Text>Email (from your account)</Text>
         <TextInput
@@ -105,9 +132,9 @@ export default function ProfileSetup() {
           value={session?.user.email ?? ''}
           editable={false}
         />
-        {step === 'password' ? (
+        {needsPassword ? (
           <>
-            <Text>Set a password</Text>
+            <Text>Set your password</Text>
             <TextInput
               accessibilityLabel="New password"
               style={styles.input}
@@ -119,17 +146,11 @@ export default function ProfileSetup() {
               autoComplete="new-password"
               editable={!busy}
             />
+            <Text>Use at least 8 characters.</Text>
             <Button
               title={showPassword ? 'Hide password' : 'Show password'}
               onPress={() => setShowPassword(value => !value)}
             />
-            <Text>
-              {password.length >= 10 ? '✓' : '○'} At least 10 characters
-            </Text>
-            <Text>
-              {/[^a-zA-Z0-9\s]/.test(password) ? '✓' : '○'} Contains a special
-              character
-            </Text>
           </>
         ) : (
           <>
@@ -143,7 +164,19 @@ export default function ProfileSetup() {
               autoCapitalize="words"
               editable={!busy}
             />
-            <Text>Role: Surveyor</Text>
+            <Text>Phone number (required)</Text>
+            <TextInput
+              accessibilityLabel="Phone number (required)"
+              style={styles.input}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              placeholder="+15105550123"
+              editable={!busy}
+            />
+            <Text>Include your country code.</Text>
+            <Text>Role: {profile?.role ?? 'surveyor'}</Text>
             <Text>Affiliation (optional)</Text>
             <TextInput
               accessibilityLabel="Affiliation (optional)"
@@ -163,16 +196,13 @@ export default function ProfileSetup() {
           </>
         )}
         {error && <Text accessibilityRole="alert">{error}</Text>}
-        <Button
-          title={
-            busy
-              ? 'Saving…'
-              : step === 'password'
-                ? 'Continue'
-                : 'Create profile'
-          }
+        <ActionButton
+          text={busy ? 'Saving…' : needsPassword ? 'Continue' : 'Save profile'}
           disabled={
-            busy || (step === 'password' ? !validPassword : !name.trim())
+            busy ||
+            (needsPassword
+              ? password.length < 8
+              : !name.trim() || !phoneNumber.trim())
           }
           onPress={() => void submit()}
         />

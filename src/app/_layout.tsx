@@ -15,6 +15,10 @@ function AuthNavigator() {
     error: profileError,
   } = useProfile();
   const verified = !!session?.user.email_confirmed_at;
+  const needsPassword =
+    session?.user.user_metadata.password_setup_required === true;
+  const hasCompleteProfile =
+    !!profile?.name?.trim() && !!profile?.phone_number?.trim();
   if (isLoading)
     return (
       <ActivityIndicator
@@ -26,11 +30,18 @@ function AuthNavigator() {
     <View style={{ flex: 1 }}>
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Stack>
-        <Stack.Protected guard={verified && !!profile}>
+        <Stack.Protected
+          guard={verified && hasCompleteProfile && !needsPassword}
+        >
           <Stack.Screen name="(app)" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected
-          guard={verified && !profileLoading && !profileError && !profile}
+          guard={
+            verified &&
+            !profileLoading &&
+            !profileError &&
+            (!hasCompleteProfile || needsPassword)
+          }
         >
           <Stack.Screen
             name="setup"
@@ -46,10 +57,6 @@ function AuthNavigator() {
         <Stack.Protected guard={!verified}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
-        <Stack.Screen
-          name="auth/callback"
-          options={{ title: 'Verify email', headerBackVisible: false }}
-        />
       </Stack>
     </View>
   );
