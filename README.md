@@ -1,55 +1,89 @@
 # BORP Adaptive Sports
 
-Expo / React Native app with basic Supabase email and password authentication.
+### Overview
 
-## Setup
+BORP Adaptive Sports and Recreation, based in Berkeley, CA, has for 50 years provided adaptive sports, fitness, and recreation programs for youth and adults with mobility and vision disabilities. Among its programs is Access California (Access CA), a roughly 20-year-old initiative that publishes detailed accessibility guides for outdoor sites — trails, beaches, parks, and gardens — across California, so that people with disabilities can know before they travel whether a site will work for them.
 
-1. Install dependencies with `pnpm install`.
-2. The existing `.env` contains `EXPO_PUBLIC_SUPABASE_URL` and
-   `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for the Supabase project. Use a
-   publishable (or legacy anon) key, never a service-role key.
-3. Enable the Email auth provider in Supabase. If Confirm Email is enabled, users
-   must confirm through email before logging in. Configure the project's Site URL
-   to a valid confirmation destination. This scaffold does not handle confirmation
-   deep links or automatically sign in from the email link.
-4. Run `pnpm start` and open the app on an iOS or Android device or simulator.
-   Restart Expo after changing `.env`.
+This app moves the whole field-collection process onto a phone:
 
-## Structure
+1. Guided surveys. Any surveyor collects the same structured data, one question at a time, following their path through a site (parking → entrance → trail).
+2. Offline-first. Everything works with no cell service and syncs when the device is back online.
+3. Review and publish. Submitted surveys go to an admin review queue, and only approved records are published to the Access California site.
 
-- `api/supabase/client.ts`: single Supabase client and persisted session storage.
-- `src/features/auth/AuthProvider.tsx`: restoration, auth events, and foreground
-  token refresh. `useAuth()` gives screens the current session.
-- `src/features/auth/AuthForm.tsx`: shared form, validation, loading and error states.
-- `src/app/(auth)/`: login and sign-up screens.
-- `src/app/(app)/`: protected placeholder home and logout.
-- `src/app/_layout.tsx`: provider and route protection; auth events update navigation.
+### Backend
 
-Sessions survive closing the app. Startup reads the saved session before attempting
-refresh, so returning users can open home offline even with an expired access token.
-Signing up, logging in, and accessing server data require a connection. Invalid or
-revoked sessions are cleared when Supabase detects them online. Logout uses the
-local scope (this device).
+The app uses a hosted Supabase project (Postgres, auth, and file storage).
 
-Saved sessions control local navigation; Supabase validates tokens for server
-requests. Future database tables must use Row Level Security policies. This
-scaffold does not cache application data for offline use.
+#### How the app talks to Supabase
 
-## Validation
+```javascript
+api/supabase/client.ts
+```
+creates the single shared Supabase client. It reads the env vars above and saves the login session to device storage (AsyncStorage) so users stay signed in. Import it anywhere with:
 
-Run `pnpm run typecheck` and `pnpm run lint:check`.
+```javascript
+import supabase from '~/api/supabase/client';
+```
 
-Manual device checklist (use a test account):
+### Schema
 
-1. Open signed out: login appears. Try empty fields and incorrect credentials.
-2. Create an account. With confirmation enabled, confirm the email and log in;
-   with confirmation disabled, home should open immediately.
-3. Log in: home displays your email. Back navigation must not reopen auth screens.
-4. Force-close and reopen: home should appear without logging in again.
-5. Disable networking and reopen. Repeat after the access token expires: home
-   should still open. Reconnect and verify refresh succeeds.
-6. Log out online: login appears. Reopening must stay signed out, and direct
-   navigation to home must not bypass login.
+TODO
 
-References: [Supabase React Native auth quickstart](https://supabase.com/docs/guides/auth/quickstarts/react-native)
-and [Expo Router protected routes](https://docs.expo.dev/router/advanced/protected/).
+---
+## Getting Started
+
+### Prerequisites
+
+Check your installation of `npm` and `node`:
+
+```sh
+node -v
+npm -v
+```
+
+We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) (for Mac) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows) to install Node.js and npm. See [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+
+Expo Go on your phone, or an iOS simulator / Android emulator
+
+### Installation
+
+1. Fork/copy the repo.
+    1. Run:
+    ```shell
+    git clone https://github.com/calblueprint/borp-adaptive-sports.git
+    ```
+    2. Navigate to the correct directory:
+    ```shell
+    cd borp-adaptive-sports
+    ```
+
+2. Install project dependencies. This command installs all packages from [`package.json`](package.json).
+      ```sh
+      # installs the pnpm tool itself — only needed once per machine
+      npm install -g pnpm
+      # installs this project's dependencies via pnpm
+      pnpm install
+      ```
+3. [in progress...] Set up secrets
+
+### Development environment
+
+- **[VSCode](https://code.visualstudio.com/) (recommended)**
+  1. Open the project in VSCode.
+  2. Install recommended workspace VSCode extensions. You should see a pop-up on the bottom right to "install the recommended extensions for this repository".
+
+### Running the app
+
+1. In the project directory, run:
+   ```shell
+    npx expo start
+   ```
+2. [Download Expo Go](https://docs.expo.dev/get-started/installation/#2-expo-go-app-for-android-and) on your phone, **connect to same network as your laptop**, and use your phone camera to scan the QR code displayed in the command line.
+
+### Development tools
+
+View the list of development scripts in the `package.json` file. Each script can be run through the terminal in the root of the project directory using the command below:
+
+```sh
+npm run <insert script name here>
+```

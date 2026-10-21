@@ -3,7 +3,7 @@
     "name": "borp-adaptive-sports",
     "slug": "borp-adaptive-sports",
     "owner": "calblueprint",
-    "scheme": "mobileapptemplate",
+    "scheme": "borp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/bp-icon.png",
