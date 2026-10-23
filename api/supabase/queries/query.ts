@@ -1,6 +1,7 @@
 import supabase from '../client';
 
 // Example query to fetch all rows from your_table_name
+// REPLACE LATER
 export async function fetchAllRows() {
   const { data, error } = await supabase.from('your_table_name').select('*');
 
