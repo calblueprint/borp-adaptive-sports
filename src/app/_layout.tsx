@@ -17,7 +17,7 @@ function AuthNavigator() {
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Stack>
         <Stack.Protected guard={!!session}>
-          <Stack.Screen name="(app)" options={{ headerShown: false }} />
+          <Stack.Screen name="(main)" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
