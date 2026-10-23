@@ -30,10 +30,8 @@ function AuthNavigator() {
     <View style={{ flex: 1 }}>
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Stack>
-        <Stack.Protected
-          guard={verified && hasCompleteProfile && !needsPassword}
-        >
-          <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Protected guard={!!session}>
+          <Stack.Screen name="(main)" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected
           guard={
