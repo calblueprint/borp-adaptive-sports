@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useProfile } from '@/features/profile/ProfileProvider';
 import supabase from '~/api/supabase/client';
 
 export default function HomeScreen() {
   const { session } = useAuth();
+  const { profile } = useProfile();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +27,8 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text>Welcome to BORP!</Text>
+      <Text>Home page</Text>
+      <Text>Welcome to BORP, {profile?.name}!</Text>
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Button
