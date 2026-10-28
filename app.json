@@ -29,6 +29,12 @@
         }
       ],
       [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow BORP Adaptive Sports to use the barometer and motion sensors to measure trail slope."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/bp-splash.png",
