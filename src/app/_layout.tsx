@@ -29,7 +29,7 @@ function AuthNavigator() {
   return (
     <View style={{ flex: 1 }}>
       {error && <Text accessibilityRole="alert">{error}</Text>}
-      <Stack>
+      <Stack screenOptions={{ headerTransparent: false }}>
         <Stack.Protected
           guard={verified && hasCompleteProfile && !needsPassword}
         >
