@@ -11,6 +11,7 @@ import {
 import { Link, useRouter } from 'expo-router';
 import ActionButton from '@/components/Button/Button';
 import supabase from '~/api/supabase/client';
+import { requestSignupCode } from '~/api/supabase/queries/auth';
 
 export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
   const isSignup = mode === 'signup';
@@ -49,18 +50,21 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
     }
     setIsSubmitting(true);
     try {
-      const { error: authError } = isSignup
-        ? await supabase.auth.signInWithOtp({
-            email: trimmedEmail,
-            options: {
-              shouldCreateUser: true,
-              data: { password_setup_required: true },
-            },
-          })
-        : await supabase.auth.signInWithPassword({
-            email: trimmedEmail,
-            password,
-          });
+      if (isSignup) {
+        const address = await requestSignupCode(trimmedEmail);
+        setSentEmail(address);
+        setPassword('');
+        setCode('');
+        setSeconds(60);
+        setMessage(
+          'Enter the code from your email. After verification, you can set your password.',
+        );
+        return;
+      }
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
       if (authError?.code === 'email_not_confirmed') {
         setError(
           'Your email is not verified. Complete account creation before logging in.',
@@ -72,15 +76,6 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
         return;
       }
       if (authError) throw authError;
-      if (isSignup) {
-        setSentEmail(trimmedEmail);
-        setPassword('');
-        setCode('');
-        setSeconds(60);
-        setMessage(
-          'Enter the code from your email. After verification, you can set your password.',
-        );
-      }
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -241,6 +236,11 @@ export default function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
                 <Button
                   title={showPassword ? 'Hide password' : 'Show password'}
                   onPress={() => setShowPassword(value => !value)}
+                />
+                <Button
+                  title="Forgot password"
+                  disabled={isSubmitting}
+                  onPress={() => router.push('/forgot-password')}
                 />
               </>
             )}
