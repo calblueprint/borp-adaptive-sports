@@ -25,6 +25,18 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
+// Recovery must not sign the main app in before the new password is saved.
+export function createPasswordRecoveryClient() {
+  return createClient(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storageKey: `${SESSION_STORAGE_KEY}-recovery`,
+    },
+  });
+}
+
 export async function readSavedSession(): Promise<Session | null> {
   const saved = await AsyncStorage.getItem(SESSION_STORAGE_KEY);
   if (!saved) return null;
