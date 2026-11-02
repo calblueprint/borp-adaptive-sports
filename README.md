@@ -62,9 +62,9 @@ Expo Go on your phone, or an iOS simulator / Android emulator
       # installs the pnpm tool itself — only needed once per machine
       npm install -g pnpm
       # installs this project's dependencies via pnpm
-      pnpm install
+      pnpm install 
       ```
-3. [in progress...] Set up secrets
+3. [in progress...] Set up secrets 
 
 ### Development environment
 
