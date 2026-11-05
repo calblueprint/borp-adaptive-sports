@@ -1,29 +1,12 @@
-import { useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useSignOut } from '@/features/auth/useSignOut';
 import { useProfile } from '@/features/profile/ProfileProvider';
-import supabase from '~/api/supabase/client';
 
 export default function HomeScreen() {
   const { session } = useAuth();
   const { profile } = useProfile();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function signOut() {
-    setIsSigningOut(true);
-    setError(null);
-    try {
-      const { error: signOutError } = await supabase.auth.signOut({
-        scope: 'local',
-      });
-      if (signOutError) setError(signOutError.message);
-    } catch {
-      setError('Unable to log out. Please try again.');
-    } finally {
-      setIsSigningOut(false);
-    }
-  }
+  const { signOut, busy, error } = useSignOut();
 
   return (
     <View style={styles.container}>
@@ -32,8 +15,8 @@ export default function HomeScreen() {
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Button
-        title={isSigningOut ? 'Logging out…' : 'Log out'}
-        disabled={isSigningOut}
+        title={busy ? 'Logging out…' : 'Log out'}
+        disabled={busy}
         onPress={() => void signOut()}
       />
     </View>

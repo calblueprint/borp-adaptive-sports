@@ -25,7 +25,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
-// Recovery must not sign the main app in before the new password is saved.
 export function createPasswordRecoveryClient() {
   return createClient(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
     auth: {

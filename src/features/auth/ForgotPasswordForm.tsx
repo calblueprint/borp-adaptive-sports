@@ -1,17 +1,13 @@
-import { useEffect, useState } from 'react';
-import {
-  Button,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-} from 'react-native';
+import { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import ActionButton from '@/components/Button/Button';
+import FormScreen from '@/components/FormScreen/FormScreen';
 import { createPasswordRecoveryClient } from '~/api/supabase/client';
 import { requestPasswordRecoveryCode } from '~/api/supabase/queries/auth';
+import CodeInput from './CodeInput';
+import { errorMessage } from './errorMessage';
+import { useCountdown } from './useCountdown';
 
 type Step = 'email' | 'code' | 'password' | 'complete';
 
@@ -25,46 +21,34 @@ export default function ForgotPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [seconds, setSeconds] = useState(0);
+  const { seconds, start, reset } = useCountdown();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!seconds) return;
-    const timer = setTimeout(
-      () => setSeconds(value => Math.max(0, value - 1)),
-      1000,
-    );
-    return () => clearTimeout(timer);
-  }, [seconds]);
-
+  // Sends the first code, or a new one when resending.
   async function sendCode() {
     if (busy || seconds > 0) return;
     setError(null);
-    const address = step === 'code' ? sentEmail : email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
-      setError('Enter a valid email address.');
-      return;
-    }
     setBusy(true);
     try {
-      const normalizedEmail = await requestPasswordRecoveryCode(
-        address,
+      const address = await requestPasswordRecoveryCode(
+        step === 'code' ? sentEmail : email,
         recoveryClient,
       );
-      setSentEmail(normalizedEmail);
+      setSentEmail(address);
       setCode('');
-      setSeconds(60);
+      start();
       setStep('code');
       setMessage(
         'We’ve sent a recovery code. Enter the newest code from your email below.',
       );
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Unable to send the recovery email. Please try again.',
+        errorMessage(
+          cause,
+          'Unable to send the recovery email. Please try again.',
+        ),
       );
     } finally {
       setBusy(false);
@@ -93,9 +77,7 @@ export default function ForgotPasswordForm() {
       setStep('password');
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Unable to verify the code. Please try again.',
+        errorMessage(cause, 'Unable to verify the code. Please try again.'),
       );
     } finally {
       setBusy(false);
@@ -123,154 +105,135 @@ export default function ForgotPasswordForm() {
       setPassword('');
       setConfirmation('');
       setStep('complete');
-      // Dispose of the temporary recovery session after the password is saved.
-      await recoveryClient.auth.signOut({ scope: 'local' }).catch(() => {});
+      // Log out every device, including this temporary recovery session.
+      await recoveryClient.auth.signOut({ scope: 'global' }).catch(() => {});
     } catch (cause) {
       setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Unable to reset your password. Please try again.',
+        errorMessage(cause, 'Unable to reset your password. Please try again.'),
       );
     } finally {
       setBusy(false);
     }
   }
 
+  function changeEmail() {
+    setStep('email');
+    setCode('');
+    reset();
+    setError(null);
+    setMessage(null);
+  }
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        {step === 'email' && (
-          <>
-            <Text>Enter your account email to reset your password.</Text>
-            <Text>Email</Text>
-            <TextInput
-              accessibilityLabel="Account email"
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              autoComplete="email"
-              editable={!busy}
-              returnKeyType="send"
-              onSubmitEditing={() => void sendCode()}
-            />
-            <ActionButton
-              text={busy ? 'Sending…' : 'Send recovery code'}
-              disabled={busy || !email.trim()}
-              onPress={() => void sendCode()}
-            />
-          </>
-        )}
-        {step === 'code' && (
-          <>
-            <Text>Check your email at {sentEmail}.</Text>
-            <Text>Recovery code</Text>
-            <TextInput
-              accessibilityLabel="Recovery code"
-              placeholder="Enter your recovery code"
-              style={styles.input}
-              value={code}
-              onChangeText={setCode}
-              keyboardType="number-pad"
-              autoComplete="one-time-code"
-              textContentType="oneTimeCode"
-              autoCapitalize="none"
-              autoCorrect={false}
-              maxLength={10}
-              editable={!busy}
-              returnKeyType="done"
-              onSubmitEditing={() => void verifyCode()}
-            />
-            <ActionButton
-              text={busy ? 'Please wait…' : 'Verify code'}
-              disabled={busy || !code.trim()}
-              onPress={() => void verifyCode()}
-            />
-            <Button
-              title={seconds ? `Resend in ${seconds}s` : 'Resend code'}
-              disabled={busy || seconds > 0}
-              onPress={() => void sendCode()}
-            />
-            <Button
-              title="Use another email"
-              disabled={busy}
-              onPress={() => {
-                setStep('email');
-                setCode('');
-                setSeconds(0);
-                setError(null);
-                setMessage(null);
-              }}
-            />
-          </>
-        )}
-        {step === 'password' && (
-          <>
-            <Text>Choose a new password for {sentEmail}.</Text>
-            <Text>New password</Text>
-            <TextInput
-              accessibilityLabel="New password"
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="new-password"
-              editable={!busy}
-            />
-            <Text>Use at least 8 characters.</Text>
-            <Text>Confirm new password</Text>
-            <TextInput
-              accessibilityLabel="Confirm new password"
-              style={styles.input}
-              value={confirmation}
-              onChangeText={setConfirmation}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="new-password"
-              editable={!busy}
-              returnKeyType="done"
-              onSubmitEditing={() => void savePassword()}
-            />
-            <Button
-              title={showPassword ? 'Hide password' : 'Show password'}
-              onPress={() => setShowPassword(value => !value)}
-            />
-            <ActionButton
-              text={busy ? 'Saving…' : 'Save new password'}
-              disabled={busy || !password || !confirmation}
-              onPress={() => void savePassword()}
-            />
-          </>
-        )}
-        {step === 'complete' && (
-          <Text accessibilityLiveRegion="polite">
-            Your password has been reset. Log in with your new password.
-          </Text>
-        )}
-        {error && <Text accessibilityRole="alert">{error}</Text>}
-        {message && <Text accessibilityLiveRegion="polite">{message}</Text>}
-        <Button
-          title="Back to log in"
-          disabled={busy}
-          onPress={() => router.replace('/login')}
-        />
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <FormScreen>
+      {step === 'email' && (
+        <>
+          <Text>Enter your account email to reset your password.</Text>
+          <Text>Email</Text>
+          <TextInput
+            accessibilityLabel="Account email"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            autoComplete="email"
+            editable={!busy}
+            returnKeyType="send"
+            onSubmitEditing={() => void sendCode()}
+          />
+          <ActionButton
+            text={busy ? 'Sending…' : 'Send recovery code'}
+            disabled={busy || !email.trim()}
+            onPress={() => void sendCode()}
+          />
+        </>
+      )}
+      {step === 'code' && (
+        <>
+          <Text>Check your email at {sentEmail}.</Text>
+          <CodeInput
+            label="Recovery code"
+            value={code}
+            onChangeText={setCode}
+            onSubmit={() => void verifyCode()}
+            editable={!busy}
+          />
+          <ActionButton
+            text={busy ? 'Please wait…' : 'Verify code'}
+            disabled={busy || !code.trim()}
+            onPress={() => void verifyCode()}
+          />
+          <Button
+            title={seconds ? `Resend in ${seconds}s` : 'Resend code'}
+            disabled={busy || seconds > 0}
+            onPress={() => void sendCode()}
+          />
+          <Button
+            title="Use another email"
+            disabled={busy}
+            onPress={changeEmail}
+          />
+        </>
+      )}
+      {step === 'password' && (
+        <>
+          <Text>Choose a new password for {sentEmail}.</Text>
+          <Text>New password</Text>
+          <TextInput
+            accessibilityLabel="New password"
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            editable={!busy}
+          />
+          <Text>Use at least 8 characters.</Text>
+          <Text>Confirm new password</Text>
+          <TextInput
+            accessibilityLabel="Confirm new password"
+            style={styles.input}
+            value={confirmation}
+            onChangeText={setConfirmation}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="new-password"
+            editable={!busy}
+            returnKeyType="done"
+            onSubmitEditing={() => void savePassword()}
+          />
+          <Button
+            title={showPassword ? 'Hide password' : 'Show password'}
+            onPress={() => setShowPassword(value => !value)}
+          />
+          <ActionButton
+            text={busy ? 'Saving…' : 'Save new password'}
+            disabled={busy || !password || !confirmation}
+            onPress={() => void savePassword()}
+          />
+        </>
+      )}
+      {step === 'complete' && (
+        <Text accessibilityLiveRegion="polite">
+          Your password has been reset. Log in with your new password.
+        </Text>
+      )}
+      {error && <Text accessibilityRole="alert">{error}</Text>}
+      {message && <Text accessibilityLiveRegion="polite">{message}</Text>}
+      <Button
+        title="Back to log in"
+        disabled={busy}
+        onPress={() => router.replace('/login')}
+      />
+    </FormScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 24, gap: 12 },
   input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
 });

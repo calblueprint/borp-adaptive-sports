@@ -1,26 +1,10 @@
-import { useState } from 'react';
 import { ActivityIndicator, Button, Text, View } from 'react-native';
+import { useSignOut } from '@/features/auth/useSignOut';
 import { useProfile } from '@/features/profile/ProfileProvider';
-import supabase from '~/api/supabase/client';
 
 export default function ProfileStatus() {
   const { error, reload } = useProfile();
-  const [signOutError, setSignOutError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  async function signOut() {
-    setBusy(true);
-    setSignOutError(null);
-    try {
-      const { error: authError } = await supabase.auth.signOut({
-        scope: 'local',
-      });
-      if (authError) throw authError;
-    } catch {
-      setSignOutError('Unable to log out. Please try again.');
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { signOut, busy, error: signOutError } = useSignOut();
   return (
     <View style={{ flex: 1, padding: 24, gap: 16 }}>
       {error ? (

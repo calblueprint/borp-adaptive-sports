@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import supabase from '../client';
 
-function normalizeEmail(email: string): string {
+export function normalizeEmail(email: string): string {
   const address = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
     throw new Error('Enter a valid email address.');
@@ -13,7 +13,7 @@ async function accountEmailExists(email: string): Promise<boolean> {
   const { data, error } = await supabase.rpc('account_email_exists', {
     email_to_check: email,
   });
-  // Fail closed: don't send auth emails when the lookup fails or is unavailable.
+
   if (error || typeof data !== 'boolean') {
     throw new Error(
       'Unable to check this email right now. Please try again later.',
