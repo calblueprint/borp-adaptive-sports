@@ -304,8 +304,12 @@ export function useTrailRecorder() {
     };
     levelReadingsRef.current = [...levelReadingsRef.current, next];
     setLiveLevelReadings(levelReadingsRef.current);
+    const cross =
+      next.crossSlopePercent === null
+        ? ''
+        : `, ${next.crossSlopePercent.toFixed(1)}% cross slope`;
     setMessage(
-      `Level reading saved at ${formatDistance(next.distanceMeters)}: ${next.runningSlopePercent.toFixed(1)}% running, ${next.crossSlopePercent.toFixed(1)}% cross slope.`,
+      `${next.method === 'sight' ? 'Camera sight' : 'Level reading'} saved at ${formatDistance(next.distanceMeters)}: ${next.runningSlopePercent.toFixed(1)}% running${cross}.`,
     );
   }
 

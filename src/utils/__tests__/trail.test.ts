@@ -58,6 +58,28 @@ describe('isTrailSession', () => {
     expect(isTrailSession(valid)).toBe(true);
   });
 
+  it('accepts camera sights, which have no cross slope', () => {
+    const reading = {
+      capturedAt: points[0].capturedAt,
+      distanceMeters: 3,
+      runningSlopePercent: 6.5,
+    };
+    expect(
+      isTrailSession(
+        sessionFrom(points, [
+          { ...reading, crossSlopePercent: null, method: 'sight' },
+          { ...reading, crossSlopePercent: 1.2 },
+        ]),
+      ),
+    ).toBe(true);
+    expect(
+      isTrailSession({
+        ...valid,
+        levelReadings: [{ ...reading, crossSlopePercent: -1 }],
+      }),
+    ).toBe(false);
+  });
+
   it('rejects invalid timestamps', () => {
     expect(isTrailSession({ ...valid, recordedAt: 'yesterday' })).toBe(false);
     expect(isTrailSession(withPoint(3, { capturedAt: 'not a date' }))).toBe(

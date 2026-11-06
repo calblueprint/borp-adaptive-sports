@@ -13,8 +13,10 @@ import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AccessibilityReportCard from '@/components/AccessibilityReportCard';
+import CameraSightCard from '@/components/CameraSightCard';
 import ElevationProfileChart from '@/components/ElevationProfileChart';
 import SlopeLevelCard from '@/components/SlopeLevelCard';
+import { useCameraSight } from '@/hooks/useCameraSight';
 import { useSlopeLevel } from '@/hooks/useSlopeLevel';
 import { useTrailRecorder } from '@/hooks/useTrailRecorder';
 import {
@@ -57,6 +59,7 @@ export default function App() {
   const [surface, setSurface] = useState<TrailSurface>('natural');
   const trail = useTrailRecorder();
   const level = useSlopeLevel();
+  const sight = useCameraSight();
 
   useEffect(() => {
     void loadSavedCount();
@@ -370,6 +373,18 @@ export default function App() {
             />
           )}
 
+          <CameraSightCard
+            canSaveToTrail={trail.isRecording}
+            onSaveToTrail={gradePercent =>
+              trail.addLevelReading({
+                crossSlopePercent: null,
+                method: 'sight',
+                runningSlopePercent: gradePercent,
+              })
+            }
+            sight={sight}
+          />
+
           <SlopeLevelCard
             canSave={trail.isRecording}
             isActive={level.isActive}
@@ -377,6 +392,7 @@ export default function App() {
             onSave={reading =>
               trail.addLevelReading({
                 crossSlopePercent: reading.crossSlopePercent,
+                method: 'level',
                 runningSlopePercent: reading.runningSlopePercent,
               })
             }
@@ -393,8 +409,8 @@ export default function App() {
             {BAROMETER_GRADE_WINDOW_METERS} m of travel; with GPS elevation
             only, over at least {GRADE_WINDOW_METERS} m, and fixes with vertical
             accuracy worse than ±{MAX_USABLE_ALTITUDE_ACCURACY_METERS} m are
-            left out. Use the level for cross slope and pitches shorter than
-            that.
+            left out. Use the camera sight for running slope over shorter
+            stretches, and the level for cross slope.
           </Text>
           <Text style={styles.logStatus}>
             {trail.sessionCount} of {MAX_TRAIL_SESSIONS} trail profiles saved
