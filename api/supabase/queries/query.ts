@@ -12,8 +12,8 @@ export async function fetchAllRows() {
   return data;
 }
 
-const TEST_USER_ID = 'ab304b15-8207-48e1-bd31-a9cc725bcf5e';
-const TEST_SITE_ID = '45b8274f-04e0-413b-8a04-9ff9b2a4eb4f';
+const TEST_USER_ID = '8ded2c71-1207-453f-aed7-89498e1fc0b3';
+const TEST_SITE_ID = '0fdd1aa1-c783-4ea3-af8f-f9dcb70b5aa1';
 
 export async function saveDraftSurvey(
   row: Record<string, unknown>,

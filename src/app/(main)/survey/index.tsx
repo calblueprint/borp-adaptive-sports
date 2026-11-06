@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Button, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { saveDraftSurvey } from '../../../api/supabase/queries/query';
-import Question from '../../components/Question/Question';
+import { saveDraftSurvey } from '~/api/supabase/queries/query';
+import Question from '@/components/Question/Question';
 import {
   Answers,
   AnswerValue,
@@ -11,8 +11,8 @@ import {
   toRow,
   validateAll,
   validateAnswer,
-} from '../../lib/survey';
-import styles from '../../styles/surveyStyles';
+} from '@/lib/survey';
+import styles from '@/styles/surveyStyles';
 
 const sections = QUESTIONS.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
