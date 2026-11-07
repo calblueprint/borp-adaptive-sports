@@ -3,6 +3,7 @@ import { Button, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { saveDraftSurvey } from '../../../api/supabase/queries/query';
 import Question from '../../components/Question/Question';
+import { useAuth } from '../../features/auth/AuthProvider';
 import {
   Answers,
   AnswerValue,
@@ -23,6 +24,7 @@ const sections = QUESTIONS.reduce<Record<string, QuestionData[]>>(
 );
 
 export default function SurveyScreen() {
+  const { session } = useAuth();
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
@@ -48,9 +50,13 @@ export default function SurveyScreen() {
       setMessage('Fix the highlighted answers first.');
       return;
     }
+    if (!session) {
+      setMessage('Please log in first.');
+      return;
+    }
     setSaving(true);
     try {
-      await saveDraftSurvey(toRow(answers));
+      await saveDraftSurvey(toRow(answers), session.user.id);
       setSaved(true);
       setMessage('Draft saved.');
     } catch (e) {
