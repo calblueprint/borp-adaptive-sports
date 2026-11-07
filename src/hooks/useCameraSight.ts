@@ -72,6 +72,8 @@ export function useCameraSight() {
   const [offsetDegrees, setOffsetDegrees] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState(0);
+  /** True once the current fore and back pair has been saved. */
+  const [isSaved, setIsSaved] = useState(false);
   const subscriptionRef = useRef<MotionSubscription | null>(null);
   const samplesRef = useRef<Vector3[]>([]);
   const sampleCountRef = useRef(0);
@@ -108,6 +110,7 @@ export function useCameraSight() {
     pendingRef.current = null;
     setLocking(null);
     Vibration.vibrate();
+    setIsSaved(false);
     if (station === 'fore') {
       setFore(sight);
       setBack(null);
@@ -216,10 +219,17 @@ export function useCameraSight() {
     setLocking(null);
     setFore(null);
     setBack(null);
+    setIsSaved(false);
     setMessage(null);
   }
 
   const result = fore && back ? twoWayGrade(fore, back, markerHeight) : null;
+
+  function changeMarkerHeight(next: MarkerHeight) {
+    setMarkerHeight(next);
+    // The same angles mean a different thing, so the result is unsaved again.
+    setIsSaved(false);
+  }
 
   /**
    * Keeps the two-way result in the on-device log, and with markers at phone
@@ -259,6 +269,7 @@ export function useCameraSight() {
         );
       }
       if (!isMountedRef.current) return saved;
+      setIsSaved(true);
       setSavedCount(updated.length);
       if (calibrates) setOffsetDegrees(result.offsetDegrees);
       setMessage(
@@ -269,6 +280,7 @@ export function useCameraSight() {
     } catch {
       if (isMountedRef.current)
         setMessage('The sight could not be saved on this device.');
+      return null;
     }
     return saved;
   }
@@ -277,6 +289,7 @@ export function useCameraSight() {
     back,
     fore,
     isActive,
+    isSaved,
     live,
     lock,
     locking,
@@ -287,7 +300,7 @@ export function useCameraSight() {
     result,
     saveResult,
     savedCount,
-    setMarkerHeight,
+    setMarkerHeight: changeMarkerHeight,
     start,
     stop,
   };

@@ -46,8 +46,9 @@ export default function CameraSightCard({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const { back, fore, live, locking, result } = sight;
 
+  // A one-way reading assumes the marker is at phone height.
   const liveGrade =
-    live && live.usable
+    live && live.usable && sight.markerHeight === 'phone'
       ? oneWayGrade(
           {
             elevationDegrees: live.elevationDegrees,
@@ -72,11 +73,11 @@ export default function CameraSightCard({
   }
 
   async function save() {
-    if (!result) return;
+    if (!result || sight.isSaved || isSaving) return;
     setIsSaving(true);
     try {
-      await sight.saveResult();
-      if (canSaveToTrail) onSaveToTrail(Math.abs(result.gradePercent));
+      const saved = await sight.saveResult();
+      if (saved && canSaveToTrail) onSaveToTrail(Math.abs(result.gradePercent));
     } finally {
       setIsSaving(false);
     }
@@ -123,8 +124,8 @@ export default function CameraSightCard({
       </View>
       <Text style={styles.message}>
         {sight.markerHeight === 'phone'
-          ? 'Use a partner at your eye level, or a pole with a mark at the height you hold the phone.'
-          : 'Working alone: drop a backpack or cone where you stand, and aim at an identical one on the trail ahead.'}
+          ? 'Use a partner at your eye level, or a pole with a mark at the height you hold the phone. Hold the phone straight above the spot where the marker stood.'
+          : 'Working alone: put a backpack or cone on the trail under where you hold the phone, and aim at an identical one ahead. Aim at the same point on each marker, such as its base.'}
       </Text>
 
       <Pressable
@@ -150,18 +151,14 @@ export default function CameraSightCard({
               active
               facing="back"
               onMountError={event => setCameraError(event.message)}
-              style={StyleSheet.absoluteFill}
+              style={styles.fill}
             />
             <View pointerEvents="none" style={styles.crosshair}>
               <View style={styles.crosshairHorizontal} />
               <View style={styles.crosshairVertical} />
               <View style={styles.crosshairRing} />
             </View>
-            <View
-              accessibilityLiveRegion="polite"
-              pointerEvents="none"
-              style={styles.overlay}
-            >
+            <View pointerEvents="none" style={styles.overlay}>
               <Text style={styles.overlayValue}>
                 {live
                   ? live.usable
@@ -276,15 +273,20 @@ export default function CameraSightCard({
           <View style={styles.row}>
             <Pressable
               accessibilityRole="button"
-              disabled={isSaving}
+              accessibilityState={{ disabled: isSaving || sight.isSaved }}
+              disabled={isSaving || sight.isSaved}
               onPress={() => void save()}
               style={({ pressed }) => [
                 styles.action,
-                (pressed || isSaving) && styles.pressed,
+                (pressed || isSaving || sight.isSaved) && styles.pressed,
               ]}
             >
               <Text style={styles.actionText}>
-                {canSaveToTrail ? 'Save sight to trail' : 'Save sight'}
+                {sight.isSaved
+                  ? 'Saved'
+                  : canSaveToTrail
+                    ? 'Save sight to trail'
+                    : 'Save sight'}
               </Text>
             </Pressable>
             <Pressable
@@ -377,8 +379,19 @@ const styles = StyleSheet.create({
     height: 320,
     overflow: 'hidden',
   },
+  fill: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
   crosshair: {
-    ...StyleSheet.absoluteFill,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
