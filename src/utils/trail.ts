@@ -65,11 +65,17 @@ export type TrailPoint = {
   speed: number | null;
 };
 
-/** A phone-tilt reading taken with the phone laid flat on the trail. */
+/**
+ * A spot slope reading: from the phone laid flat on the trail ('level'), or
+ * from a two-way camera sight held in the hand ('sight'). Readings saved
+ * before sights existed have no method and are level readings.
+ */
 export type LevelReading = {
   capturedAt: string;
-  crossSlopePercent: number;
+  /** Null for a camera sight, which measures running slope only. */
+  crossSlopePercent: number | null;
   distanceMeters: number;
+  method?: 'level' | 'sight';
   runningSlopePercent: number;
 };
 
@@ -369,8 +375,12 @@ function isLevelReading(value: unknown): value is LevelReading {
   const reading = value as Record<string, unknown>;
   return (
     isTimestamp(reading.capturedAt) &&
-    isFiniteNumber(reading.crossSlopePercent) &&
-    reading.crossSlopePercent >= 0 &&
+    (reading.crossSlopePercent === null ||
+      (isFiniteNumber(reading.crossSlopePercent) &&
+        reading.crossSlopePercent >= 0)) &&
+    (reading.method === undefined ||
+      reading.method === 'level' ||
+      reading.method === 'sight') &&
     isFiniteNumber(reading.distanceMeters) &&
     reading.distanceMeters >= 0 &&
     isFiniteNumber(reading.runningSlopePercent) &&

@@ -183,4 +183,27 @@ describe('analyzeTrailAccessibility', () => {
       severity: 'violation',
     });
   });
+
+  it('reports camera sight running slope without a cross slope', () => {
+    const points = walk({ lengthMeters: 4 });
+    const report = analyzeTrailAccessibility(
+      points,
+      [
+        {
+          capturedAt: points[0].capturedAt,
+          crossSlopePercent: null,
+          distanceMeters: 0,
+          method: 'sight',
+          runningSlopePercent: 14,
+        },
+      ],
+      'trail',
+      'natural',
+    );
+    expect(report.findings).toHaveLength(1);
+    expect(report.findings[0]).toMatchObject({
+      citation: 'ABA 1017.7.1',
+      measured: expect.stringContaining('camera sight'),
+    });
+  });
 });

@@ -487,15 +487,20 @@ function levelFindings(
   const findings: AccessibilityFinding[] = [];
 
   readings.forEach(reading => {
-    const cross = reading.crossSlopePercent / 100;
+    const cross =
+      reading.crossSlopePercent === null
+        ? null
+        : reading.crossSlopePercent / 100;
     const running = reading.runningSlopePercent / 100;
-    if (cross > maxCross + EPSILON) {
+    const source =
+      reading.method === 'sight' ? 'camera sight' : 'level reading';
+    if (cross !== null && cross > maxCross + EPSILON) {
       findings.push({
         citation:
           standard === 'trail' ? 'ABA 1017.7.2' : 'CBC 11B-403.3, 11B-405.3',
         endMeters: reading.distanceMeters,
         limit: maxCross === 0.05 ? '1:20 (5%) max' : '1:48 (2.08%) max',
-        measured: `${formatSlope(cross)} across (level reading)`,
+        measured: `${formatSlope(cross)} across (${source})`,
         rule: 'Cross slope too steep',
         severity: 'violation',
         startMeters: reading.distanceMeters,
@@ -506,7 +511,7 @@ function levelFindings(
         citation: standard === 'trail' ? 'ABA 1017.7.1' : 'CBC 11B-405.2',
         endMeters: reading.distanceMeters,
         limit: standard === 'trail' ? '1:8 (12%) max' : '1:12 (8.33%) max',
-        measured: `${formatSlope(running)} (level reading)`,
+        measured: `${formatSlope(running)} (${source})`,
         rule: 'Running slope too steep at this spot',
         severity: 'violation',
         startMeters: reading.distanceMeters,
@@ -585,15 +590,11 @@ export function trailToCsv(
   const track = smoothedTrack(points, source);
   const readings = placeReadings(track, levelReadings);
   withElevation(track).forEach(({ distance, elevation }) => {
-    const nearby = readings.filter(
-      reading => Math.abs(reading.distanceMeters - distance) <= 2,
-    );
-    const cross =
-      nearby.length > 0
-        ? Math.max(...nearby.map(reading => reading.crossSlopePercent)).toFixed(
-            1,
-          )
-        : '';
+    const nearby = readings
+      .filter(reading => Math.abs(reading.distanceMeters - distance) <= 2)
+      .map(reading => reading.crossSlopePercent)
+      .filter((cross): cross is number => cross !== null);
+    const cross = nearby.length > 0 ? Math.max(...nearby).toFixed(1) : '';
     rows.push(
       [
         (distance / METERS_PER_FOOT).toFixed(2),
