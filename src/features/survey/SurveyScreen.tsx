@@ -13,7 +13,7 @@ import {
   validateAll,
   validateAnswer,
 } from '@/lib/survey';
-import { saveDraftSurvey } from '~/api/supabase/queries/query';
+import { submitSurvey } from '~/api/supabase/queries/query';
 import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
@@ -71,9 +71,9 @@ export default function SurveyScreen() {
     }
     setSaving(true);
     try {
-      await saveDraftSurvey(toRow(answers), session.user.id);
+      await submitSurvey(toRow(answers), session.user.id);
       setSaved(true);
-      router.push('/survey/sent');
+      router.replace('/survey/sent');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not send survey.');
     } finally {

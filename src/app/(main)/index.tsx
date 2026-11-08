@@ -18,7 +18,9 @@ export default function HomeScreen() {
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
 
-      <Link href="/survey">Go to survey</Link>
+      <Link href="/survey" style={styles.link}>
+        Go to survey
+      </Link>
 
       <Button
         title={busy ? 'Logging out…' : 'Log out'}
