@@ -16,7 +16,7 @@ export type Question = {
 export type AnswerValue = string | boolean | string[] | undefined;
 export type Answers = Record<string, AnswerValue>;
 
-export const QUESTIONS: Question[] = [
+export const questionList: Question[] = [
   {
     section: 'Site Information',
     column: 'site_type',
@@ -182,7 +182,6 @@ function isEmpty(value: AnswerValue) {
   );
 }
 
-// returns an error message for one answer, or null if it is fine/blank
 export function validateAnswer(q: Question, value: AnswerValue): string | null {
   if (isEmpty(value)) return null;
 
@@ -222,20 +221,19 @@ export function validateAnswer(q: Question, value: AnswerValue): string | null {
   }
 }
 
-// returns { column: message } for every invalid answer.
 export function validateAll(answers: Answers) {
   const errors: Record<string, string> = {};
-  for (const q of QUESTIONS) {
+  for (const q of questionList) {
     const error = validateAnswer(q, answers[q.column]);
     if (error) errors[q.column] = error;
   }
   return errors;
 }
 
-// converts answers to database values, blank answers become null
 export function toRow(answers: Answers) {
   const row: Record<string, string | number | boolean | string[] | null> = {};
-  for (const q of QUESTIONS) {
+
+  for (const q of questionList) {
     const value = answers[q.column];
     if (isEmpty(value)) row[q.column] = null;
     else if (q.type === 'number')

@@ -6,7 +6,7 @@ import {
   Answers,
   AnswerValue,
   Question as QuestionData,
-  QUESTIONS,
+  questionList,
   toRow,
   validateAll,
   validateAnswer,
@@ -14,7 +14,7 @@ import {
 import { saveDraftSurvey } from '~/api/supabase/queries/query';
 import styles from './styles';
 
-const sections = QUESTIONS.reduce<Record<string, QuestionData[]>>(
+const sections = questionList.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
     (groups[q.section] ??= []).push(q);
     return groups;
