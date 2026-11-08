@@ -30,7 +30,7 @@ export default function SurveySentScreen() {
           <Text style={styles.check}>✓</Text>
         </View>
         <Text style={styles.title}>Thanks, {name}!</Text>
-        <Text style={styles.subtitle}>Your survey is with BORP.</Text>
+        <Text style={styles.subtitle}>BORP has received your survey.</Text>
 
         <View style={styles.next}>
           <Text style={styles.nextHeading}>What happens next</Text>
