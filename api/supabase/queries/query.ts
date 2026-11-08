@@ -37,5 +37,5 @@ export async function submitSurvey(
     updated_at: now,
     submitted_at: now,
   });
-  if (error) throw new Error(`Error saving draft: ${error.message}`);
+  if (error) throw new Error(`Error submitting survey: ${error.message}`);
 }

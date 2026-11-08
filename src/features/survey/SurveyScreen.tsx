@@ -124,6 +124,7 @@ export default function SurveyScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
+        <BackButton style={styles.backButton} />
         <Text style={styles.title}>Trail Survey</Text>
 
         {Object.entries(sections).map(([sectionName, questions]) => (
