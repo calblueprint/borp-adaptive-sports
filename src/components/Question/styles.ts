@@ -1,26 +1,29 @@
 import { StyleSheet } from 'react-native';
+import colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
+
+const inputBase = {
+  ...typography.p1,
+  borderWidth: 1,
+  borderColor: colors.lightGray,
+  borderRadius: 6,
+  padding: 8,
+  marginTop: 6,
+};
 
 export default StyleSheet.create({
   question: { marginBottom: 14 },
-  label: { fontSize: 16, fontWeight: '600' },
+  label: { ...typography.p1, fontWeight: '600' },
   options: { marginTop: 6, marginLeft: 4 },
-  hint: { fontSize: 13, fontStyle: 'italic', color: '#777', marginBottom: 4 },
-  option: { fontSize: 15, color: '#444', lineHeight: 28 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 8,
-    marginTop: 6,
+  hint: {
+    ...typography.p2,
+    fontStyle: 'italic',
+    color: colors.gray,
+    marginBottom: 4,
   },
-  notes: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 8,
-    marginTop: 6,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  error: { color: '#b00020', marginTop: 4 },
+  optionRow: { minHeight: 44, justifyContent: 'center' },
+  option: { ...typography.p1 },
+  input: inputBase,
+  notes: { ...inputBase, minHeight: 80, textAlignVertical: 'top' },
+  error: { ...typography.p2, color: colors.red, marginTop: 4 },
 });

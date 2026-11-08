@@ -8,7 +8,7 @@ type ButtonProps = {
 };
 
 // A styled button component
-// Edit the styles in styles.tsx to change default styles
+// Edit the styles in styles.ts to change default styles
 function Button({ disabled, onPress, text }: ButtonProps) {
   return (
     <RNButton
