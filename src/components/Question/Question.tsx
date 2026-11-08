@@ -21,6 +21,8 @@ function Option({ label, selected, multi, onPress }: OptionProps) {
   return (
     <Pressable
       onPress={onPress}
+      style={styles.optionRow}
+      accessibilityLabel={label}
       accessibilityRole={multi ? 'checkbox' : 'radio'}
       accessibilityState={{ checked: selected }}
     >
@@ -49,6 +51,7 @@ function Question({ question, value, error, onChange }: QuestionProps) {
       {question.type === 'text' && (
         <TextInput
           style={question.multiline ? styles.notes : styles.input}
+          accessibilityLabel={question.label}
           multiline={question.multiline}
           value={text}
           onChangeText={onChange}
@@ -59,6 +62,7 @@ function Question({ question, value, error, onChange }: QuestionProps) {
       {question.type === 'number' && (
         <TextInput
           style={styles.input}
+          accessibilityLabel={question.label}
           keyboardType="decimal-pad"
           value={text}
           onChangeText={t => onChange(t.replace(/[^0-9.]/g, ''))}
@@ -108,7 +112,11 @@ function Question({ question, value, error, onChange }: QuestionProps) {
         </View>
       )}
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      )}
     </View>
   );
 }

@@ -8,14 +8,14 @@ import {
   Answers,
   AnswerValue,
   Question as QuestionData,
-  QUESTIONS,
+  questionList,
   toRow,
   validateAll,
   validateAnswer,
 } from '../../lib/survey';
 import styles from '../../styles/surveyStyles';
 
-const sections = QUESTIONS.reduce<Record<string, QuestionData[]>>(
+const sections = questionList.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
     (groups[q.section] ??= []).push(q);
     return groups;

@@ -36,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@eslint/js": "^9.32.0",
+    "@expo/ngrok": "^4.1.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
     "@types/node": "^26.6.4",
     "@types/react": "~19.3.0",
