@@ -1,9 +1,27 @@
+import type { TablesInsert } from '~/api/supabase/database.types';
+
+// The survey columns the user fills in. Everything else on the row
+// (ids, status, timestamps, review fields) is set by the app or BORP.
+export type SurveyAnswersRow = Omit<
+  TablesInsert<'surveys'>,
+  | 'id'
+  | 'site_id'
+  | 'surveyor_id'
+  | 'status'
+  | 'version'
+  | 'created_at'
+  | 'updated_at'
+  | 'submitted_at'
+  | 'reviewer_id'
+  | 'review_notes'
+>;
+
 export type QuestionType =
   'text' | 'number' | 'boolean' | 'single_select' | 'multi_select';
 
 export type Question = {
   section: string;
-  column: string;
+  column: keyof SurveyAnswersRow;
   label: string;
   type: QuestionType;
   options?: string[];
@@ -230,7 +248,9 @@ export function validateAll(answers: Answers) {
   return errors;
 }
 
-export function toRow(answers: Answers) {
+export function toRow(answers: Answers): SurveyAnswersRow {
+  // Built by column name in a loop, so TypeScript can't match each value to
+  // its column here. Column names are still checked via Question['column'].
   const row: Record<string, string | number | boolean | string[] | null> = {};
 
   for (const q of questionList) {
@@ -241,5 +261,5 @@ export function toRow(answers: Answers) {
     else if (q.type === 'text') row[q.column] = (value as string).trim();
     else row[q.column] = value as boolean | string | string[];
   }
-  return row;
+  return row as SurveyAnswersRow;
 }

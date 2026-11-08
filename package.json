@@ -11,6 +11,7 @@
     "prettier:check": "pnpm exec prettier --check .",
     "prettier:fix": "pnpm exec prettier --write .",
     "typecheck": "pnpm exec tsc --noEmit",
+    "gen:types": "pnpm dlx supabase gen types typescript --project-id txhzxdlcsjsoayosbjpb > api/supabase/database.types.ts && pnpm exec prettier --write api/supabase/database.types.ts",
     "prepare": "husky",
     "pre-commit": "(pnpm run typecheck || true) && (pnpm run lint:check || true) && pnpm run prettier:check",
     "preinstall": "npx only-allow pnpm"

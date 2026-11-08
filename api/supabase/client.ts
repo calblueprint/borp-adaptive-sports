@@ -1,5 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import type { Session } from '@supabase/supabase-js';
+import type { Database } from './database.types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
@@ -15,18 +16,22 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 
 const SESSION_STORAGE_KEY = `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    storageKey: SESSION_STORAGE_KEY,
+const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      storage: AsyncStorage,
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+      storageKey: SESSION_STORAGE_KEY,
+    },
   },
-});
+);
 
 export function createPasswordRecoveryClient() {
-  return createClient(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
+  return createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
