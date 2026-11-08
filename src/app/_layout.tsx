@@ -16,7 +16,7 @@ function AuthNavigator() {
         style={{ flex: 1 }}
       />
     );
-    
+
   return (
     <View style={{ flex: 1 }}>
       {error && <Text accessibilityRole="alert">{error}</Text>}
