@@ -5,6 +5,8 @@ const colors = {
   lightGray: '#CCCCCC',
   red: '#B00020',
   blue: '#0066CC',
+  glass: 'rgba(255, 255, 255, 0.72)',
+  glassBorder: 'rgba(255, 255, 255, 0.7)',
 };
 
 export default colors;

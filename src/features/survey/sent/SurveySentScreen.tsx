@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Button from '@/components/Button/Button';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import styles from './styles';
 
@@ -53,9 +54,7 @@ export default function SurveySentScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Pressable style={styles.button} onPress={() => router.replace('/')}>
-          <Text style={styles.buttonText}>Done</Text>
-        </Pressable>
+        <Button text="Done" onPress={() => router.replace('/')} />
       </View>
     </SafeAreaView>
   );

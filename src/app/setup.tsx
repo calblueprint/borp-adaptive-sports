@@ -1,4 +1,5 @@
-import { Button, StyleSheet, Text, TextInput } from 'react-native';
+import { StyleSheet, Text, TextInput } from 'react-native';
+import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
 import { useAuth } from '@/features/auth/AuthProvider';
 import SetPasswordForm from '@/features/auth/SetPasswordForm';
@@ -31,7 +32,7 @@ export default function ProfileSetup() {
           <ProfileForm />
           {error && <Text accessibilityRole="alert">{error}</Text>}
           <Button
-            title="Log out"
+            text="Log out"
             disabled={busy}
             onPress={() => void signOut()}
           />

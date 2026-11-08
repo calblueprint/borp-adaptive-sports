@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput } from 'react-native';
+import { StyleSheet, Text, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import ActionButton from '@/components/Button/Button';
+import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
 import { createPasswordRecoveryClient } from '~/api/supabase/client';
 import { requestPasswordRecoveryCode } from '~/api/supabase/queries/auth';
@@ -143,7 +143,7 @@ export default function ForgotPasswordForm() {
             returnKeyType="send"
             onSubmitEditing={() => void sendCode()}
           />
-          <ActionButton
+          <Button
             text={busy ? 'Sending…' : 'Send recovery code'}
             disabled={busy || !email.trim()}
             onPress={() => void sendCode()}
@@ -160,18 +160,18 @@ export default function ForgotPasswordForm() {
             onSubmit={() => void verifyCode()}
             editable={!busy}
           />
-          <ActionButton
+          <Button
             text={busy ? 'Please wait…' : 'Verify code'}
             disabled={busy || !code.trim()}
             onPress={() => void verifyCode()}
           />
           <Button
-            title={seconds ? `Resend in ${seconds}s` : 'Resend code'}
+            text={seconds ? `Resend in ${seconds}s` : 'Resend code'}
             disabled={busy || seconds > 0}
             onPress={() => void sendCode()}
           />
           <Button
-            title="Use another email"
+            text="Use another email"
             disabled={busy}
             onPress={changeEmail}
           />
@@ -208,10 +208,10 @@ export default function ForgotPasswordForm() {
             onSubmitEditing={() => void savePassword()}
           />
           <Button
-            title={showPassword ? 'Hide password' : 'Show password'}
+            text={showPassword ? 'Hide password' : 'Show password'}
             onPress={() => setShowPassword(value => !value)}
           />
-          <ActionButton
+          <Button
             text={busy ? 'Saving…' : 'Save new password'}
             disabled={busy || !password || !confirmation}
             onPress={() => void savePassword()}
@@ -226,7 +226,7 @@ export default function ForgotPasswordForm() {
       {error && <Text accessibilityRole="alert">{error}</Text>}
       {message && <Text accessibilityLiveRegion="polite">{message}</Text>}
       <Button
-        title="Back to log in"
+        text="Back to log in"
         disabled={busy}
         onPress={() => router.replace('/login')}
       />

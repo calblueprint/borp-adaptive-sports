@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput } from 'react-native';
-import ActionButton from '@/components/Button/Button';
+import { StyleSheet, Text, TextInput } from 'react-native';
+import Button from '@/components/Button/Button';
 import supabase from '~/api/supabase/client';
 
 export default function SetPasswordForm() {
@@ -51,11 +51,11 @@ export default function SetPasswordForm() {
       />
       <Text>Use at least 8 characters.</Text>
       <Button
-        title={showPassword ? 'Hide password' : 'Show password'}
+        text={showPassword ? 'Hide password' : 'Show password'}
         onPress={() => setShowPassword(value => !value)}
       />
       {error && <Text accessibilityRole="alert">{error}</Text>}
-      <ActionButton
+      <Button
         text={busy ? 'Saving…' : 'Continue'}
         disabled={busy || password.length < 8}
         onPress={() => void submit()}

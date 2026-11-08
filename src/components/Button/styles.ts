@@ -2,27 +2,17 @@ import { StyleSheet } from 'react-native';
 import colors from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
-const titleBase = {
-  ...typography.p1,
-  paddingHorizontal: 24,
-  paddingVertical: 5,
-};
-
 export default StyleSheet.create({
-  disabledStyle: {
-    borderRadius: 5,
-    backgroundColor: colors.lightGray,
-  },
-  buttonStyle: {
-    borderRadius: 5,
+  button: {
     backgroundColor: colors.black,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 24,
   },
-  titleStyle: {
-    ...titleBase,
-    color: colors.white,
-  },
-  disabledTitleStyle: {
-    ...titleBase,
-    color: colors.black,
-  },
+  pressed: { opacity: 0.8 },
+  disabled: { backgroundColor: colors.lightGray },
+  text: { ...typography.p1, color: colors.white, fontWeight: '600' },
+  disabledText: { color: colors.gray },
 });

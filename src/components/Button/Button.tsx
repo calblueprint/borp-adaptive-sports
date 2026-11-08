@@ -1,25 +1,30 @@
-import { Button as RNButton } from '@rneui/themed';
+import { Pressable, StyleProp, Text, ViewStyle } from 'react-native';
 import styles from './styles';
 
 type ButtonProps = {
-  disabled: boolean;
   text: string;
   onPress: () => void;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
-// A styled button component
-// Edit the styles in styles.ts to change default styles
-function Button({ disabled, onPress, text }: ButtonProps) {
+// The app's default button: a rounded black pill
+function Button({ text, onPress, disabled = false, style }: ButtonProps) {
   return (
-    <RNButton
-      disabledStyle={styles.disabledStyle}
-      buttonStyle={styles.buttonStyle}
-      disabledTitleStyle={styles.disabledTitleStyle}
-      titleStyle={styles.titleStyle}
-      title={text}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-    />
+      style={({ pressed }) => [
+        styles.button,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+        style,
+      ]}
+    >
+      <Text style={[styles.text, disabled && styles.disabledText]}>{text}</Text>
+    </Pressable>
   );
 }
 

@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import BackButton from '@/components/BackButton/BackButton';
+import Button from '@/components/Button/Button';
 import Question from '@/components/Question/Question';
 import { useAuth } from '@/features/auth/AuthProvider';
 import {
@@ -85,9 +87,10 @@ export default function SurveyScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container}>
-          <Pressable style={styles.backButton} onPress={() => setStep('form')}>
-            <Text style={styles.backText}>‹</Text>
-          </Pressable>
+          <BackButton
+            style={styles.backButton}
+            onPress={() => setStep('form')}
+          />
           <Text style={styles.eyebrow}>Trail survey</Text>
           <Text style={styles.title}>Review and send</Text>
 
@@ -108,15 +111,11 @@ export default function SurveyScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable
-            style={styles.button}
+          <Button
+            text={saving ? 'Sending…' : 'Send to BORP'}
             onPress={handleSave}
             disabled={saving || saved}
-          >
-            <Text style={styles.buttonText}>
-              {saving ? 'Sending…' : 'Send to BORP'}
-            </Text>
-          </Pressable>
+          />
         </View>
       </SafeAreaView>
     );
@@ -142,9 +141,11 @@ export default function SurveyScreen() {
           </View>
         ))}
 
-        <Pressable style={styles.button} onPress={handleReview}>
-          <Text style={styles.buttonText}>Review</Text>
-        </Pressable>
+        <Button
+          text="Review"
+          onPress={handleReview}
+          style={styles.reviewButton}
+        />
         {message !== '' && <Text style={styles.message}>{message}</Text>}
       </ScrollView>
     </SafeAreaView>

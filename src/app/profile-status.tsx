@@ -1,4 +1,5 @@
-import { ActivityIndicator, Button, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
+import Button from '@/components/Button/Button';
 import { useSignOut } from '@/features/auth/useSignOut';
 import { useProfile } from '@/features/profile/ProfileProvider';
 
@@ -10,7 +11,7 @@ export default function ProfileStatus() {
       {error ? (
         <>
           <Text accessibilityRole="alert">{error}</Text>
-          <Button title="Retry" onPress={reload} />
+          <Button text="Retry" onPress={reload} />
         </>
       ) : (
         <>
@@ -19,7 +20,7 @@ export default function ProfileStatus() {
         </>
       )}
       {signOutError && <Text accessibilityRole="alert">{signOutError}</Text>}
-      <Button title="Log out" disabled={busy} onPress={() => void signOut()} />
+      <Button text="Log out" disabled={busy} onPress={() => void signOut()} />
     </View>
   );
 }

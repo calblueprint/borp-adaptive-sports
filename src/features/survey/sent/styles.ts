@@ -31,11 +31,4 @@ export default StyleSheet.create({
   stepTitleMuted: { ...typography.p1, fontWeight: '600', color: colors.gray },
   stepNote: { ...typography.p3, color: colors.gray },
   footer: { padding: 24, backgroundColor: colors.white },
-  button: {
-    backgroundColor: colors.black,
-    borderRadius: 28,
-    paddingVertical: 18,
-    alignItems: 'center',
-  },
-  buttonText: { ...typography.p1, color: colors.white, fontWeight: '600' },
 });
