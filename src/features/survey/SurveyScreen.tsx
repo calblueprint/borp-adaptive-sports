@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Button, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { saveDraftSurvey } from '../../../api/supabase/queries/query';
-import Question from '../../components/Question/Question';
-import { useAuth } from '../../features/auth/AuthProvider';
+import Question from '@/components/Question/Question';
+import { useAuth } from '@/features/auth/AuthProvider';
 import {
   Answers,
   AnswerValue,
@@ -12,8 +11,9 @@ import {
   toRow,
   validateAll,
   validateAnswer,
-} from '../../lib/survey';
-import styles from '../../styles/surveyStyles';
+} from '@/lib/survey';
+import { saveDraftSurvey } from '~/api/supabase/queries/query';
+import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
