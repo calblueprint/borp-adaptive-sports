@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput } from 'react-native';
+import TextField from '@/components/TextField/TextField';
 
 export default function CodeInput({
   label,
@@ -14,29 +14,21 @@ export default function CodeInput({
   editable: boolean;
 }) {
   return (
-    <>
-      <Text>{label}</Text>
-      <TextInput
-        accessibilityLabel={label}
-        placeholder="Enter the code from your email"
-        autoFocus
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType="number-pad"
-        autoComplete="one-time-code"
-        textContentType="oneTimeCode"
-        autoCapitalize="none"
-        autoCorrect={false}
-        maxLength={10}
-        editable={editable}
-        returnKeyType="done"
-        onSubmitEditing={onSubmit}
-      />
-    </>
+    <TextField
+      label={label}
+      placeholder="Enter the code from your email"
+      autoFocus
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType="number-pad"
+      autoComplete="one-time-code"
+      textContentType="oneTimeCode"
+      autoCapitalize="none"
+      autoCorrect={false}
+      maxLength={10}
+      editable={editable}
+      returnKeyType="done"
+      onSubmitEditing={onSubmit}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});

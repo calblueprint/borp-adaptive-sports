@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
+import { Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
+import TextField from '@/components/TextField/TextField';
+import TextLink from '@/components/TextLink/TextLink';
 import supabase from '~/api/supabase/client';
 import { normalizeEmail } from '~/api/supabase/queries/auth';
 import { errorMessage } from './errorMessage';
+import styles from './styles';
 
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,12 +43,20 @@ export default function LoginForm() {
   }
 
   return (
-    <FormScreen>
-      <Text>Log in</Text>
-      <Text>Email</Text>
-      <TextInput
-        accessibilityLabel="Email"
-        style={styles.input}
+    <FormScreen
+      title="Welcome back"
+      subtitle="Sign in with your email and password"
+      onClose={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+      footer={
+        <Button
+          text={busy ? 'Please wait…' : 'Sign in'}
+          disabled={busy}
+          onPress={() => void logIn()}
+        />
+      }
+    >
+      <TextField
+        label="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -55,13 +65,11 @@ export default function LoginForm() {
         autoComplete="email"
         editable={!busy}
       />
-      <Text>Password</Text>
-      <TextInput
-        accessibilityLabel="Password"
-        style={styles.input}
+      <TextField
+        label="Password"
+        secure
         value={password}
         onChangeText={setPassword}
-        secureTextEntry={!showPassword}
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="current-password"
@@ -69,30 +77,23 @@ export default function LoginForm() {
         onSubmitEditing={() => void logIn()}
         returnKeyType="done"
       />
-      <Button
-        text={showPassword ? 'Hide password' : 'Show password'}
-        onPress={() => setShowPassword(value => !value)}
-      />
-      <Button
-        text="Forgot password"
-        disabled={busy}
-        onPress={() => router.push('/forgot-password')}
-      />
-      <Button
-        text={busy ? 'Please wait…' : 'Log in'}
-        disabled={busy}
-        onPress={() => void logIn()}
-      />
-      {error && <Text accessibilityRole="alert">{error}</Text>}
-      <Button
-        text="Create account"
-        disabled={busy}
-        onPress={() => router.push('/signup')}
-      />
+      {error && (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      )}
+      <View style={styles.links}>
+        <TextLink
+          text="Forgot password?"
+          disabled={busy}
+          onPress={() => router.push('/forgot-password')}
+        />
+        <TextLink
+          text="New to BORP? Create an account"
+          disabled={busy}
+          onPress={() => router.push('/signup')}
+        />
+      </View>
     </FormScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});

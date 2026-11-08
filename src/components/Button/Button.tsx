@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { Pressable, StyleProp, Text, ViewStyle } from 'react-native';
 import styles from './styles';
 
@@ -5,11 +6,22 @@ type ButtonProps = {
   text: string;
   onPress: () => void;
   disabled?: boolean;
+  // 'primary' is black; 'secondary' is light with black text
+  variant?: 'primary' | 'secondary';
+  // Shown before the text, e.g. a logo
+  icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
 
-// The app's default button: a rounded black pill
-function Button({ text, onPress, disabled = false, style }: ButtonProps) {
+// The app's default button: a rounded pill
+function Button({
+  text,
+  onPress,
+  disabled = false,
+  variant = 'primary',
+  icon,
+  style,
+}: ButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -18,12 +30,22 @@ function Button({ text, onPress, disabled = false, style }: ButtonProps) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        variant === 'secondary' && styles.secondary,
         pressed && styles.pressed,
         disabled && styles.disabled,
         style,
       ]}
     >
-      <Text style={[styles.text, disabled && styles.disabledText]}>{text}</Text>
+      {icon}
+      <Text
+        style={[
+          styles.text,
+          variant === 'secondary' && styles.secondaryText,
+          disabled && styles.disabledText,
+        ]}
+      >
+        {text}
+      </Text>
     </Pressable>
   );
 }

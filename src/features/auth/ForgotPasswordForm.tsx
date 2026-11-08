@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
+import { Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
+import TextField from '@/components/TextField/TextField';
+import TextLink from '@/components/TextLink/TextLink';
 import { createPasswordRecoveryClient } from '~/api/supabase/client';
 import { requestPasswordRecoveryCode } from '~/api/supabase/queries/auth';
 import CodeInput from './CodeInput';
 import { errorMessage } from './errorMessage';
+import PasswordRule from './PasswordRule';
+import styles from './styles';
 import { useCountdown } from './useCountdown';
 
 type Step = 'email' | 'code' | 'password' | 'complete';
@@ -20,7 +24,6 @@ export default function ForgotPasswordForm() {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const { seconds, start, reset } = useCountdown();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,116 +127,153 @@ export default function ForgotPasswordForm() {
     setMessage(null);
   }
 
-  return (
-    <FormScreen>
-      {step === 'email' && (
-        <>
-          <Text>Enter your account email to reset your password.</Text>
-          <Text>Email</Text>
-          <TextInput
-            accessibilityLabel="Account email"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            autoComplete="email"
-            editable={!busy}
-            returnKeyType="send"
-            onSubmitEditing={() => void sendCode()}
-          />
-          <Button
-            text={busy ? 'Sending…' : 'Send recovery code'}
-            disabled={busy || !email.trim()}
-            onPress={() => void sendCode()}
-          />
-        </>
+  const goBack = () =>
+    router.canGoBack() ? router.back() : router.replace('/login');
+
+  const feedback = (
+    <>
+      {error && (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
       )}
-      {step === 'code' && (
-        <>
-          <Text>Check your email at {sentEmail}.</Text>
-          <CodeInput
-            label="Recovery code"
-            value={code}
-            onChangeText={setCode}
-            onSubmit={() => void verifyCode()}
-            editable={!busy}
-          />
+      {message && (
+        <Text style={styles.message} accessibilityLiveRegion="polite">
+          {message}
+        </Text>
+      )}
+    </>
+  );
+
+  if (step === 'code')
+    return (
+      <FormScreen
+        title="Check your email"
+        subtitle={`Enter the recovery code sent to ${sentEmail}.`}
+        onBack={goBack}
+        footer={
           <Button
             text={busy ? 'Please wait…' : 'Verify code'}
             disabled={busy || !code.trim()}
             onPress={() => void verifyCode()}
           />
-          <Button
+        }
+      >
+        <CodeInput
+          label="Recovery code"
+          value={code}
+          onChangeText={setCode}
+          onSubmit={() => void verifyCode()}
+          editable={!busy}
+        />
+        {feedback}
+        <View style={styles.links}>
+          <TextLink
             text={seconds ? `Resend in ${seconds}s` : 'Resend code'}
             disabled={busy || seconds > 0}
             onPress={() => void sendCode()}
           />
-          <Button
+          <TextLink
             text="Use another email"
             disabled={busy}
             onPress={changeEmail}
           />
-        </>
-      )}
-      {step === 'password' && (
-        <>
-          <Text>Choose a new password for {sentEmail}.</Text>
-          <Text>New password</Text>
-          <TextInput
-            accessibilityLabel="New password"
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            editable={!busy}
-          />
-          <Text>Use at least 8 characters.</Text>
-          <Text>Confirm new password</Text>
-          <TextInput
-            accessibilityLabel="Confirm new password"
-            style={styles.input}
-            value={confirmation}
-            onChangeText={setConfirmation}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="new-password"
-            editable={!busy}
-            returnKeyType="done"
-            onSubmitEditing={() => void savePassword()}
-          />
-          <Button
-            text={showPassword ? 'Hide password' : 'Show password'}
-            onPress={() => setShowPassword(value => !value)}
-          />
+        </View>
+      </FormScreen>
+    );
+
+  if (step === 'password')
+    return (
+      <FormScreen
+        title="Choose a new password"
+        subtitle={`For ${sentEmail}`}
+        onBack={goBack}
+        footer={
           <Button
             text={busy ? 'Saving…' : 'Save new password'}
             disabled={busy || !password || !confirmation}
             onPress={() => void savePassword()}
           />
-        </>
-      )}
-      {step === 'complete' && (
-        <Text accessibilityLiveRegion="polite">
-          Your password has been reset. Log in with your new password.
-        </Text>
-      )}
-      {error && <Text accessibilityRole="alert">{error}</Text>}
-      {message && <Text accessibilityLiveRegion="polite">{message}</Text>}
-      <Button
-        text="Back to log in"
-        disabled={busy}
-        onPress={() => router.replace('/login')}
+        }
+      >
+        <TextField
+          label="New password"
+          secure
+          value={password}
+          onChangeText={setPassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          editable={!busy}
+        />
+        <TextField
+          label="Confirm new password"
+          secure
+          value={confirmation}
+          onChangeText={setConfirmation}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          editable={!busy}
+          returnKeyType="done"
+          onSubmitEditing={() => void savePassword()}
+        />
+        <View style={styles.rules}>
+          <PasswordRule
+            text="At least 8 characters"
+            met={password.length >= 8}
+          />
+          <PasswordRule
+            text="Passwords match"
+            met={!!password && password === confirmation}
+          />
+        </View>
+        {feedback}
+      </FormScreen>
+    );
+
+  if (step === 'complete')
+    return (
+      <FormScreen
+        title="Password reset"
+        subtitle="Your password has been reset. Log in with your new password."
+        footer={
+          <Button
+            text="Back to sign in"
+            onPress={() => router.replace('/login')}
+          />
+        }
+      >
+        {feedback}
+      </FormScreen>
+    );
+
+  return (
+    <FormScreen
+      title="Reset your password"
+      subtitle="Enter your account email to reset your password."
+      onBack={goBack}
+      footer={
+        <Button
+          text={busy ? 'Sending…' : 'Send recovery code'}
+          disabled={busy || !email.trim()}
+          onPress={() => void sendCode()}
+        />
+      }
+    >
+      <TextField
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        autoComplete="email"
+        editable={!busy}
+        returnKeyType="send"
+        onSubmitEditing={() => void sendCode()}
       />
+      {feedback}
     </FormScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});
