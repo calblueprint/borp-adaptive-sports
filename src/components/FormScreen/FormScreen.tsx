@@ -1,31 +1,56 @@
+import { ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import Header from '@/components/Header/Header';
+import styles from './styles';
 
-// Scrollable page that keeps form fields above the keyboard.
+type FormScreenProps = {
+  title: string;
+  subtitle?: string;
+  onBack?: () => void;
+  onClose?: () => void;
+  // Pinned to the bottom, usually the main button
+  footer?: ReactNode;
+  children: ReactNode;
+};
+
+// Standard form page: header, title + subtitle, fields, and a bottom button.
+// Keeps fields above the keyboard.
 export default function FormScreen({
+  title,
+  subtitle,
+  onBack,
+  onClose,
+  footer,
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: FormScreenProps) {
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.safe}>
+      <StatusBar style="dark" />
+      <Header onBack={onBack} onClose={onClose} />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.heading}>
+            <Text style={styles.title}>{title}</Text>
+            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          </View>
+          <View style={styles.body}>{children}</View>
+        </ScrollView>
+        {footer && <View style={styles.footer}>{footer}</View>}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 24, gap: 12 },
-});

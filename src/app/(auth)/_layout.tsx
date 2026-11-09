@@ -1,19 +1,10 @@
 import { Stack } from 'expo-router';
 
+// Welcome (index) is always the first screen in this group
 export const unstable_settings = {
-  anchor: 'login',
+  anchor: 'index',
 };
 
 export default function AuthLayout() {
-  return (
-    <Stack screenOptions={{ headerTransparent: false }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ title: 'Log in' }} />
-      <Stack.Screen name="signup" options={{ title: 'Create account' }} />
-      <Stack.Screen
-        name="forgot-password"
-        options={{ title: 'Reset password' }}
-      />
-    </Stack>
-  );
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

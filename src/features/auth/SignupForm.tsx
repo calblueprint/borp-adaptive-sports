@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
-import { Link } from 'expo-router';
+import { Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
+import TextField from '@/components/TextField/TextField';
+import TextLink from '@/components/TextLink/TextLink';
 import supabase from '~/api/supabase/client';
 import { requestSignupCode } from '~/api/supabase/queries/auth';
 import CodeInput from './CodeInput';
 import { errorMessage } from './errorMessage';
+import styles from './styles';
 import { useCountdown } from './useCountdown';
 
 export default function SignupForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [sentEmail, setSentEmail] = useState<string | null>(null);
   const [code, setCode] = useState('');
@@ -81,68 +85,93 @@ export default function SignupForm() {
     setMessage(null);
   }
 
-  return (
-    <FormScreen>
-      {sentEmail ? (
-        <>
-          <Text>Check your email</Text>
-          <Text>Enter the verification code sent to {sentEmail}.</Text>
-          <CodeInput
-            label="Verification code"
-            value={code}
-            onChangeText={setCode}
-            onSubmit={() => void verifyCode()}
-            editable={!busy}
-          />
+  const goBack = () =>
+    router.canGoBack() ? router.back() : router.replace('/login');
+
+  const feedback = (
+    <>
+      {error && (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      )}
+      {message && (
+        <Text style={styles.message} accessibilityLiveRegion="polite">
+          {message}
+        </Text>
+      )}
+    </>
+  );
+
+  if (sentEmail)
+    return (
+      <FormScreen
+        title="Check your email"
+        subtitle={`Enter the verification code sent to ${sentEmail}.`}
+        onBack={goBack}
+        footer={
           <Button
             text={busy ? 'Verifying…' : 'Verify code'}
             disabled={busy || !code.trim()}
             onPress={() => void verifyCode()}
           />
-          <Button
+        }
+      >
+        <CodeInput
+          label="Verification code"
+          value={code}
+          onChangeText={setCode}
+          onSubmit={() => void verifyCode()}
+          editable={!busy}
+        />
+        {feedback}
+        <View style={styles.links}>
+          <TextLink
             text={seconds ? `Resend in ${seconds}s` : 'Resend code'}
             disabled={busy || seconds > 0}
             onPress={() => void sendCode()}
           />
-          <Button
+          <TextLink
             text="Use another email"
             disabled={busy}
             onPress={changeEmail}
           />
-        </>
-      ) : (
-        <>
-          <Text>Create an account</Text>
-          <Text>Email</Text>
-          <TextInput
-            accessibilityLabel="Email"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            autoComplete="email"
-            editable={!busy}
-          />
-          <Text>
-            We’ll email you a verification code. Set your password after
-            confirming your email.
-          </Text>
-          <Button
-            text={busy ? 'Please wait…' : 'Continue'}
-            disabled={busy}
-            onPress={() => void sendCode()}
-          />
-        </>
-      )}
-      {error && <Text accessibilityRole="alert">{error}</Text>}
-      {message && <Text accessibilityLiveRegion="polite">{message}</Text>}
-      {!sentEmail && <Link href="/login">Already have an account? Log in</Link>}
+        </View>
+      </FormScreen>
+    );
+
+  return (
+    <FormScreen
+      title="Create an account"
+      subtitle="Sign up with your email"
+      onBack={goBack}
+      footer={
+        <Button
+          text={busy ? 'Please wait…' : 'Continue'}
+          disabled={busy}
+          onPress={() => void sendCode()}
+        />
+      }
+    >
+      <TextField
+        label="Email"
+        helper="We’ll email you a verification code. Set your password after confirming your email."
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        autoComplete="email"
+        editable={!busy}
+      />
+      {feedback}
+      <View style={styles.links}>
+        <TextLink
+          text="Already have an account? Sign in"
+          disabled={busy}
+          onPress={goBack}
+        />
+      </View>
     </FormScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});
