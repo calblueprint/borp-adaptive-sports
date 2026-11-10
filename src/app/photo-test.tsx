@@ -5,7 +5,7 @@ import supabase from '~/api/supabase/client';
 const TEST_SURVEY_ID = '0d663bf2-d06b-41e5-8204-cf1b58488c68';
 
 async function uploadFile(uri: string, mimeType: string) {
-  const ext = uri.split('.').pop();
+  const ext = mimeType.split('/')[1] ?? 'jpg';
   const path = `${TEST_SURVEY_ID}/${Date.now()}.${ext}`;
 
   const body = await (await fetch(uri)).arrayBuffer();
