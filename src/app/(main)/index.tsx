@@ -1,4 +1,6 @@
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import Button from '@/components/Button/Button';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useSignOut } from '@/features/auth/useSignOut';
 import { useProfile } from '@/features/profile/ProfileProvider';
@@ -26,6 +28,7 @@ export default function HomeScreen() {
         disabled={busy}
         onPress={() => void signOut()}
       />
+
       <Link href="/trails">Trails</Link>
     </View>
   );
