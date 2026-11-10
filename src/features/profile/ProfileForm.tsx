@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput } from 'react-native';
-import ActionButton from '@/components/Button/Button';
+import Button from '@/components/Button/Button';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import { createProfile, updateProfile } from '~/api/supabase/queries/profiles';
@@ -106,7 +106,7 @@ export default function ProfileForm() {
         editable={!busy}
       />
       {error && <Text accessibilityRole="alert">{error}</Text>}
-      <ActionButton
+      <Button
         text={busy ? 'Saving…' : 'Save profile'}
         disabled={busy || !name.trim() || !phoneNumber.trim()}
         onPress={() => void submit()}

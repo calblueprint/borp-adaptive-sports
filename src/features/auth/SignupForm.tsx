@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput } from 'react-native';
+import { StyleSheet, Text, TextInput } from 'react-native';
 import { Link } from 'expo-router';
-import ActionButton from '@/components/Button/Button';
+import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
 import supabase from '~/api/supabase/client';
 import { requestSignupCode } from '~/api/supabase/queries/auth';
@@ -94,18 +94,18 @@ export default function SignupForm() {
             onSubmit={() => void verifyCode()}
             editable={!busy}
           />
-          <ActionButton
+          <Button
             text={busy ? 'Verifying…' : 'Verify code'}
             disabled={busy || !code.trim()}
             onPress={() => void verifyCode()}
           />
           <Button
-            title={seconds ? `Resend in ${seconds}s` : 'Resend code'}
+            text={seconds ? `Resend in ${seconds}s` : 'Resend code'}
             disabled={busy || seconds > 0}
             onPress={() => void sendCode()}
           />
           <Button
-            title="Use another email"
+            text="Use another email"
             disabled={busy}
             onPress={changeEmail}
           />
@@ -129,7 +129,7 @@ export default function SignupForm() {
             We’ll email you a verification code. Set your password after
             confirming your email.
           </Text>
-          <ActionButton
+          <Button
             text={busy ? 'Please wait…' : 'Continue'}
             disabled={busy}
             onPress={() => void sendCode()}

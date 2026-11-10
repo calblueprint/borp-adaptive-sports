@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput } from 'react-native';
+import { StyleSheet, Text, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
-import ActionButton from '@/components/Button/Button';
+import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
 import supabase from '~/api/supabase/client';
 import { normalizeEmail } from '~/api/supabase/queries/auth';
@@ -70,21 +70,21 @@ export default function LoginForm() {
         returnKeyType="done"
       />
       <Button
-        title={showPassword ? 'Hide password' : 'Show password'}
+        text={showPassword ? 'Hide password' : 'Show password'}
         onPress={() => setShowPassword(value => !value)}
       />
       <Button
-        title="Forgot password"
+        text="Forgot password"
         disabled={busy}
         onPress={() => router.push('/forgot-password')}
       />
-      <ActionButton
+      <Button
         text={busy ? 'Please wait…' : 'Log in'}
         disabled={busy}
         onPress={() => void logIn()}
       />
       {error && <Text accessibilityRole="alert">{error}</Text>}
-      <ActionButton
+      <Button
         text="Create account"
         disabled={busy}
         onPress={() => router.push('/signup')}

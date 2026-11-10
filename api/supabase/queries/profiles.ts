@@ -27,6 +27,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
 }
 
 export async function createProfile(user: User, details: ProfileDetails) {
+  if (!user.email) throw new Error('Cannot create a profile without an email.');
   const { error } = await supabase
     .from('profiles')
     .insert({ ...details, id: user.id, email: user.email, role: 'surveyor' });
