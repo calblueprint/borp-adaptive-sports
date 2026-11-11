@@ -41,7 +41,11 @@ import { GlassHeart, useSave } from '@/components/SaveHeart/SaveHeart';
 import { barButtonTop, TitleBar } from '@/components/TitleBar/TitleBar';
 import { StatusLabel } from '@/components/TrailStatus/TrailStatus';
 import { trailPhotos } from '@/data/trail-photos';
-import { aidFor, useAccount } from '@/features/account/AccountProvider';
+import {
+  aidFor,
+  howYouGoHref,
+  useAccount,
+} from '@/features/account/AccountProvider';
 import {
   formatElapsed,
   useElapsed,
@@ -57,7 +61,6 @@ import {
   splitUnit,
   trailTime,
 } from '@/lib/access';
-import { comingSoon } from '@/lib/comingSoon';
 import { MAPS_APPS, openInMaps } from '@/lib/directions';
 import { colors, type } from '@/styles/theme';
 import styles, { SHEET } from './styles';
@@ -215,7 +218,7 @@ type KeyReadings = NonNullable<ReturnType<typeof keyReadings>>;
  *  ("♿ Set how you go on trails ›", navy and a size up, since it's the one thing on the page that needs you)
  *  and the words compare with the guideline. The first time it goes straight to adding one, not to an empty list. */
 function ForYou({ readings }: { readings: KeyReadings }) {
-  const { mobility } = useAccount();
+  const { aids, mobility } = useAccount();
   const items = [
     { c: readings.width, spoken: 'Narrowest width' },
     { c: readings.grade, spoken: 'Steepest grade' },
@@ -253,7 +256,7 @@ function ForYou({ readings }: { readings: KeyReadings }) {
         )
       }
       invite={!mobility}
-      onPress={() => comingSoon('How you go on trails')}
+      onPress={() => router.push(howYouGoHref(aids.length))}
       accessibilityHint={
         mobility
           ? 'Change how you go on trails'

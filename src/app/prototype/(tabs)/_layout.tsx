@@ -6,11 +6,16 @@ import { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { BlurTargetView } from 'expo-blur';
 import { router } from 'expo-router';
-import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
+import {
+  TabList,
+  Tabs,
+  TabSlot,
+  TabTrigger,
+  useTabTrigger,
+} from 'expo-router/ui';
 import { Glass } from '@/components/Glass/Glass';
 import { TAB_BAR_HEIGHT, TabBar } from '@/components/TabBar/TabBar';
 import Plus from '@/icons/add.svg';
-import { comingSoon } from '@/lib/comingSoon';
 import { colors } from '@/styles/theme';
 
 export default function TabsLayout() {
@@ -24,6 +29,7 @@ export default function TabsLayout() {
       {/* Declares the tabs; the dock is what you see and tap */}
       <TabList style={styles.hidden}>
         <TabTrigger name="trails" href="/prototype/trails" />
+        <TabTrigger name="account" href="/prototype/account" />
       </TabList>
       <Dock blurTarget={contentRef} />
     </Tabs>
@@ -35,13 +41,13 @@ function Dock({
 }: {
   blurTarget: RefObject<ComponentRef<typeof View> | null>;
 }) {
-  // The profile tab comes with the account screens; until then Profile says so
-  const current = 'home';
+  const { getTrigger, switchTab } = useTabTrigger({ name: 'trails' });
+  const current = getTrigger('account')?.isFocused ? 'profile' : 'home';
 
   return (
     <TabBar
       current={current}
-      onSelect={() => comingSoon('Your profile')}
+      onSelect={tab => switchTab(tab === 'home' ? 'trails' : 'account', {})}
       blurTarget={blurTarget}
       accessory={
         current === 'home' ? (

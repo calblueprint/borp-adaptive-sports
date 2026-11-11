@@ -17,7 +17,6 @@ import { NextSteps, Stats } from '@/components/SurveySummary/SurveySummary';
 import { useAccount } from '@/features/account/AccountProvider';
 import { formatElapsed, useSurvey } from '@/features/survey/SurveyProvider';
 import { useTrails } from '@/features/trails/TrailsProvider';
-import { comingSoon } from '@/lib/comingSoon';
 import { colors, spring, type } from '@/styles/theme';
 import styles from './styles';
 
@@ -45,9 +44,15 @@ export default function SentScreen() {
       router.dismissTo({ pathname: '/prototype/trail/[id]', params: { id } }),
     );
   }
-  // Your surveys in the profile come with the account screens; until then this says so
   function openInProfile() {
-    comingSoon('Your surveys in the profile');
+    leave(() => {
+      router.dismissTo('/prototype/trails');
+      router.replace('/prototype/account');
+      router.push({
+        pathname: '/prototype/account/survey/[id]',
+        params: { id: subId },
+      });
+    });
   }
 
   useEffect(() => {
