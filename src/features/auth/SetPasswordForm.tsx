@@ -5,6 +5,7 @@ import supabase from '~/api/supabase/client';
 
 export default function SetPasswordForm() {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +17,10 @@ export default function SetPasswordForm() {
       setError('Use at least 8 characters.');
       return;
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match. Please try again.');
+      return;
+    }
     setBusy(true);
     try {
       const { error: passwordError } = await supabase.auth.updateUser({
@@ -24,6 +29,7 @@ export default function SetPasswordForm() {
       });
       if (passwordError) throw passwordError;
       setPassword('');
+      setConfirmPassword('');
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -50,6 +56,20 @@ export default function SetPasswordForm() {
         editable={!busy}
       />
       <Text>Use at least 8 characters.</Text>
+      <Text>Confirm password</Text>
+      <TextInput
+        accessibilityLabel="Confirm password"
+        style={styles.input}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry={!showPassword}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        editable={!busy}
+        onSubmitEditing={() => void submit()}
+        returnKeyType="done"
+      />
       <Button
         text={showPassword ? 'Hide password' : 'Show password'}
         onPress={() => setShowPassword(value => !value)}
@@ -57,7 +77,7 @@ export default function SetPasswordForm() {
       {error && <Text accessibilityRole="alert">{error}</Text>}
       <Button
         text={busy ? 'Saving…' : 'Continue'}
-        disabled={busy || password.length < 8}
+        disabled={busy || password.length < 8 || !confirmPassword}
         onPress={() => void submit()}
       />
     </>

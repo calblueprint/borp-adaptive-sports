@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { fetchProfile } from '~/api/supabase/queries/profiles';
+import { cacheProfile, readCachedProfile } from './profileCache';
 
 type ProfileState = {
   userId: string;
@@ -34,23 +35,27 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
     setState(null);
-    if (userId) {
-      void fetchProfile(userId).then(
-        profile => {
-          if (active) setState({ userId, profile, error: null });
-        },
-        cause => {
-          console.error('Failed to load profile', cause);
-          if (active)
-            setState({
-              userId,
-              profile: null,
-              error:
-                'Unable to load your profile. Check your connection and try again.',
-            });
-        },
-      );
+    async function loadProfile(id: string) {
+      const cached = await readCachedProfile(id);
+      if (!active) return;
+      if (cached) setState({ userId: id, profile: cached, error: null });
+      try {
+        const profile = await fetchProfile(id);
+        if (!active) return;
+        setState({ userId: id, profile, error: null });
+        await cacheProfile(id, profile);
+      } catch (cause) {
+        console.error('Failed to load profile', cause);
+        if (active && !cached)
+          setState({
+            userId: id,
+            profile: null,
+            error:
+              'Unable to load your profile. Check your connection and try again.',
+          });
+      }
     }
+    if (userId) void loadProfile(userId);
     return () => {
       active = false;
     };
