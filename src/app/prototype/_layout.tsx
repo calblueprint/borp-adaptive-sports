@@ -25,6 +25,32 @@ export default function PrototypeLayout() {
                   name="index"
                   options={{ contentStyle: { backgroundColor: colors.navy } }}
                 />
+                <Stack.Screen
+                  name="add-trail"
+                  options={{ presentation: 'modal' }}
+                />
+                {/* A sheet you can swipe away; opens full height because search is focused with the keyboard up */}
+                <Stack.Screen
+                  name="location"
+                  options={{
+                    presentation: 'formSheet',
+                    sheetAllowedDetents: [1],
+                    sheetGrabberVisible: true,
+                    sheetCornerRadius: 20,
+                  }}
+                />
+                {/* Fake system location alert, over whatever screen asked */}
+                <Stack.Screen
+                  name="location-access"
+                  options={{
+                    presentation: 'transparentModal',
+                    animation: 'fade',
+                    gestureEnabled: false,
+                    contentStyle: { backgroundColor: 'transparent' },
+                  }}
+                />
+                {/* Home and Profile; switching between them happens inside, with no transition */}
+                <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
               </Stack>
             </SurveyProvider>
           </LocationProvider>

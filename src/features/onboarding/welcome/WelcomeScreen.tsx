@@ -1,6 +1,6 @@
 // Figma: Creating an Account 11 — welcome. Opens with the rolling-logo intro.
 import { useState } from 'react';
-import { Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useIsFocused } from 'expo-router';
@@ -25,6 +25,22 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
+      {__DEV__ && (
+        // DEV ONLY: jump past the auth screens straight to home
+        <Pressable
+          onPress={() => router.replace('/prototype/trails')}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Skip auth (dev only)"
+          style={({ pressed }) => [
+            styles.devSkip,
+            { top: insets.top + 8 },
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text style={styles.devSkipText}>Skip (dev)</Text>
+        </Pressable>
+      )}
       <View style={[styles.logo, { top: (LOGO_TOP / FRAME_HEIGHT) * height }]}>
         <RollingLogo
           size={LOGO_SIZE}

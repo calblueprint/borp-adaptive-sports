@@ -20,4 +20,16 @@ export default StyleSheet.create({
     color: colors.legal,
   },
   link: { textDecorationLine: 'underline' },
+  devSkip: {
+    position: 'absolute',
+    right: 16,
+    zIndex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: colors.white,
+  },
+  devSkipText: { fontSize: 12, fontWeight: '600', color: colors.white },
+  pressed: { opacity: 0.6 },
 });
