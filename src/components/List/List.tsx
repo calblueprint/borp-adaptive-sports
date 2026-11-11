@@ -1,4 +1,4 @@
-// Groups and rows, shared by every screen. No boxes: a caption, rows and hairlines (DESIGN.md › Layout).
+// Groups and rows, shared by every screen. No boxes: a caption, rows and hairlines.
 import type { ReactNode } from 'react';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';

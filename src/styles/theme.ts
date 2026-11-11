@@ -92,7 +92,7 @@ export const trailColors = {
 // SF Pro is the iOS system font, so no fontFamily is needed there.
 // Figma weights 510 / 590 map to the nearest available system weights.
 export const type = {
-  // The app's text system (DESIGN.md › Type)
+  // The app's text system
   /** Page title and the trail or person's name: 28 semibold (bold read too thick). */
   title: {
     fontSize: 28,
