@@ -1,11 +1,10 @@
+import type { Site } from '@/components/SiteCard/SiteCard';
 import { useEffect, useState } from 'react';
-import { Image, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput } from 'react-native';
+import SiteCard from '@/components/SiteCard/SiteCard';
 import colors from '@/styles/colors';
 import supabase from '~/api/supabase/client';
-import fillerImage from '~/assets/bp-icon.png';
 import styles from './styles';
-
-type Site = { id: string; name: string; lat: number; lng: number };
 
 const COORDS = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
 
@@ -79,13 +78,7 @@ export default function TrailsScreen() {
       />
       {error && <Text style={styles.error}>Error: {error}</Text>}
       {results.map(site => (
-        <View key={site.id} style={styles.card}>
-          <Image source={fillerImage} style={styles.image} />
-          <Text style={styles.name}>{site.name}</Text>
-          <Text style={styles.meta}>
-            lat: {site.lat} · lng: {site.lng}
-          </Text>
-        </View>
+        <SiteCard key={site.id} site={site} />
       ))}
     </ScrollView>
   );

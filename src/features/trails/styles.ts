@@ -19,12 +19,4 @@ export default StyleSheet.create({
     elevation: 3,
   },
   error: { ...typography.p2, color: colors.red },
-  card: { gap: 6 },
-  image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 20,
-  },
-  name: { ...typography.p1, fontWeight: '600', color: colors.black },
-  meta: { ...typography.p2, color: colors.gray },
 });
