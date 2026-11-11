@@ -1,36 +1,31 @@
-import { useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router';
+import Button from '@/components/Button/Button';
 import { useAuth } from '@/features/auth/AuthProvider';
-import supabase from '~/api/supabase/client';
+import { useSignOut } from '@/features/auth/useSignOut';
+import { useProfile } from '@/features/profile/ProfileProvider';
+import colors from '@/styles/colors';
+import { typography } from '@/styles/typography';
 
 export default function HomeScreen() {
   const { session } = useAuth();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function signOut() {
-    setIsSigningOut(true);
-    setError(null);
-    try {
-      const { error: signOutError } = await supabase.auth.signOut({
-        scope: 'local',
-      });
-      if (signOutError) setError(signOutError.message);
-    } catch {
-      setError('Unable to log out. Please try again.');
-    } finally {
-      setIsSigningOut(false);
-    }
-  }
+  const { profile } = useProfile();
+  const { signOut, busy, error } = useSignOut();
 
   return (
     <View style={styles.container}>
-      <Text>Welcome to BORP!</Text>
+      <Text>Home page</Text>
+      <Text>Welcome to BORP, {profile?.name}!</Text>
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
+
+      <Link href="/survey" style={styles.link}>
+        Start Survey
+      </Link>
+
       <Button
-        title={isSigningOut ? 'Logging out…' : 'Log out'}
-        disabled={isSigningOut}
+        text={busy ? 'Logging out…' : 'Log out'}
+        disabled={busy}
         onPress={() => void signOut()}
       />
     </View>
@@ -39,4 +34,9 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, gap: 16 },
+  link: {
+    ...typography.p1,
+    color: colors.blue,
+    textDecorationLine: 'underline',
+  },
 });
