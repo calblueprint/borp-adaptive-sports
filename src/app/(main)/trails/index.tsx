@@ -1,16 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import colors from '@/styles/colors';
-import { typography } from '@/styles/typography';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 import supabase from '~/api/supabase/client';
-import fillerImage from '~/assets/bp-icon.png';
 
 type Site = { id: string; name: string; lat: number; lng: number };
 
@@ -70,57 +60,23 @@ export default function TrailsPage() {
   const results = search(sites, query);
 
   return (
-    <ScrollView
-      style={styles.page}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
+    <ScrollView>
       <TextInput
-        style={styles.search}
         value={query}
         onChangeText={setQuery}
-        placeholder="Search trails"
-        placeholderTextColor={colors.gray}
+        placeholder="Search by name or lat, lng"
         autoCapitalize="none"
         autoCorrect={false}
       />
-      {error && <Text style={styles.error}>Error: {error}</Text>}
+      {error && <Text>Error: {error}</Text>}
+      <Text>{results.length} sites</Text>
       {results.map(site => (
-        <View key={site.id} style={styles.card}>
-          <Image source={fillerImage} style={styles.image} />
-          <Text style={styles.name}>{site.name}</Text>
-          <Text style={styles.meta}>
-            lat: {site.lat} · lng: {site.lng}
-          </Text>
+        <View key={site.id} style={{ borderWidth: 1, padding: 8, margin: 8 }}>
+          <Text>name: {site.name}</Text>
+          <Text>lat: {site.lat}</Text>
+          <Text>lng: {site.lng}</Text>
         </View>
       ))}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  page: { backgroundColor: colors.white },
-  content: { padding: 16, gap: 16 },
-  search: {
-    ...typography.p1,
-    backgroundColor: colors.white,
-    borderRadius: 999,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    color: colors.black,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  error: { ...typography.p2, color: colors.red },
-  card: { gap: 6 },
-  image: {
-    width: '100%',
-    height: 200,
-    borderRadius: 20,
-  },
-  name: { ...typography.p1, fontWeight: '600', color: colors.black },
-  meta: { ...typography.p2, color: colors.gray },
-});
