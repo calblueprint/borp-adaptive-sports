@@ -32,8 +32,6 @@ export default function HomeScreen() {
         disabled={busy}
         onPress={() => void signOut()}
       />
-
-      <Link href="/trails">Trails</Link>
     </View>
   );
 }
