@@ -18,11 +18,11 @@ export default function HomeScreen() {
       <Text>Welcome to BORP, {profile?.name}!</Text>
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
-      
+
       <Link href="/trails" style={styles.link}>
         Search trails
       </Link>
-      
+
       <Link href="/survey" style={styles.link}>
         Start Survey
       </Link>
