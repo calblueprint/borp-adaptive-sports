@@ -19,18 +19,17 @@ function AuthNavigator() {
     session?.user.user_metadata.password_setup_required === true;
   const hasCompleteProfile =
     !!profile?.name?.trim() && !!profile?.phone_number?.trim();
-  // Exactly one screen group is reachable, checked in priority order.
   const screen = !verified
     ? 'auth'
-    : profileLoading || profileError
+    : profileError
       ? 'status'
       : needsPassword || !hasCompleteProfile
         ? 'setup'
         : 'main';
-  if (isLoading)
+  if (isLoading || (verified && profileLoading))
     return (
       <ActivityIndicator
-        accessibilityLabel="Restoring session"
+        accessibilityLabel={isLoading ? 'Restoring session' : 'Loading profile'}
         style={{ flex: 1 }}
       />
     );
