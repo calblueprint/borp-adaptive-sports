@@ -19,6 +19,10 @@ export default function HomeScreen() {
       <Text>Signed in as {session?.user.email}</Text>
       {error && <Text accessibilityRole="alert">{error}</Text>}
 
+      <Link href="/trails" style={styles.link}>
+        Search trails
+      </Link>
+
       <Link href="/survey" style={styles.link}>
         Start Survey
       </Link>
@@ -28,8 +32,6 @@ export default function HomeScreen() {
         disabled={busy}
         onPress={() => void signOut()}
       />
-
-      <Link href="/trails">Trails</Link>
     </View>
   );
 }
