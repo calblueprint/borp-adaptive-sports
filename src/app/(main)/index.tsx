@@ -27,6 +27,12 @@ export default function HomeScreen() {
         Start Survey
       </Link>
 
+      {profile?.role === 'admin' && (
+        <Link href="/admin" style={styles.link}>
+          Admin dashboard
+        </Link>
+      )}
+
       <Button
         text={busy ? 'Logging out…' : 'Log out'}
         disabled={busy}
