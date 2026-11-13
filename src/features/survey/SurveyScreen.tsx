@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
 import Question from '@/components/Question/Question';
@@ -35,6 +35,7 @@ const formatAnswer = (v: AnswerValue | undefined) => {
 
 export default function SurveyScreen() {
   const { session } = useAuth();
+  const { siteId } = useLocalSearchParams<{ siteId: string }>();
   const router = useRouter();
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,7 +74,7 @@ export default function SurveyScreen() {
     }
     setSaving(true);
     try {
-      await submitSurvey(toRow(answers), session.user.id);
+      await submitSurvey(toRow(answers), session.user.id, siteId);
       setSaved(true);
       router.replace('/survey/sent');
     } catch (e) {
@@ -82,6 +83,18 @@ export default function SurveyScreen() {
       setSaving(false);
     }
   };
+
+  if (!siteId) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.container}>
+          <BackButton style={styles.backButton} />
+          <Text style={styles.title}>No site selected</Text>
+          <Link href="/trails">Choose a site</Link>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (step === 'review') {
     return (

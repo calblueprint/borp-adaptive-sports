@@ -23,10 +23,6 @@ export default function HomeScreen() {
         Search trails
       </Link>
 
-      <Link href="/survey" style={styles.link}>
-        Start Survey
-      </Link>
-
       <Button
         text={busy ? 'Logging out…' : 'Log out'}
         disabled={busy}

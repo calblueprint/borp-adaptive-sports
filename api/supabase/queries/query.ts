@@ -1,17 +1,18 @@
 import type { SurveyAnswersRow } from '@/lib/survey';
 import supabase from '../client';
 
-const TEST_SITE_ID = '0640cbbe-a919-442c-875d-b48dbd27eba1';
+//const TEST_SITE_ID = '0640cbbe-a919-442c-875d-b48dbd27eba1';
 
 // this function dead for now, we are just going to submit
 export async function saveDraftSurvey(
   row: SurveyAnswersRow,
   userId: string,
+  siteId: string,
 ): Promise<void> {
   const now = new Date().toISOString();
   const { error } = await supabase.from('surveys').insert({
     ...row,
-    site_id: TEST_SITE_ID,
+    site_id: siteId,
     surveyor_id: userId,
     status: 'draft',
     version: 0,
@@ -25,11 +26,12 @@ export async function saveDraftSurvey(
 export async function submitSurvey(
   row: SurveyAnswersRow,
   userId: string,
+  siteId: string,
 ): Promise<void> {
   const now = new Date().toISOString();
   const { error } = await supabase.from('surveys').insert({
     ...row,
-    site_id: TEST_SITE_ID,
+    site_id: siteId,
     surveyor_id: userId,
     status: 'submitted',
     version: 0,
