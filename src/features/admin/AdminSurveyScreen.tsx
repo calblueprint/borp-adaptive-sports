@@ -24,7 +24,11 @@ export default function AdminSurveyScreen() {
   const survey = data?.survey;
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.page}
+      contentContainerStyle={styles.content}
+      contentInsetAdjustmentBehavior="automatic"
+    >
       <Text accessibilityRole="header" style={styles.title}>
         Survey details
       </Text>

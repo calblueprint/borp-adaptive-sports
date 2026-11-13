@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import Button from '@/components/Button/Button';
 import colors from '@/styles/colors';
 import { fetchAdminSites } from '~/api/supabase/queries/admin';
 import { LoadState } from './components';
@@ -9,6 +10,7 @@ import styles from './styles';
 import { useAdminResource } from './useAdminResource';
 
 export default function AdminSitesScreen() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const { data, loading, error, reload } = useAdminResource(fetchAdminSites);
   const sites = data?.filter(site => matchesSite(site.name, query)) ?? [];
@@ -17,11 +19,13 @@ export default function AdminSitesScreen() {
     <FlatList
       style={styles.page}
       contentContainerStyle={styles.content}
+      contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       data={sites}
       keyExtractor={site => site.id}
       ListHeaderComponent={
         <View style={styles.section}>
+          <Button text="Back to home" onPress={() => router.dismissTo('/')} />
           <Text accessibilityRole="header" style={styles.title}>
             Admin dashboard
           </Text>

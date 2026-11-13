@@ -16,6 +16,7 @@ export default function AdminSiteScreen() {
     <FlatList
       style={styles.page}
       contentContainerStyle={styles.content}
+      contentInsetAdjustmentBehavior="automatic"
       data={data?.surveys ?? []}
       keyExtractor={survey => survey.id}
       ListHeaderComponent={
