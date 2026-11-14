@@ -56,6 +56,7 @@ function AuthNavigator() {
         <Stack.Protected guard={screen === 'auth'}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
+        <Stack.Screen name="prototype" options={{ headerShown: false }} />
       </Stack>
     </View>
   );
