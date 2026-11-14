@@ -1,9 +1,7 @@
 import type { SurveyAnswersRow } from '@/lib/survey';
 import supabase from '../client';
 
-//const TEST_SITE_ID = '0640cbbe-a919-442c-875d-b48dbd27eba1';
-
-// this function dead for now, we are just going to submit
+// TODO: not used yet. Call this to save a draft before the survey is submitted.
 export async function saveDraftSurvey(
   row: SurveyAnswersRow,
   userId: string,

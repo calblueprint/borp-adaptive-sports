@@ -17,7 +17,10 @@ export default function SiteSheet({ site, onClose }: SiteSheetProps) {
   function startSurvey() {
     if (!site) return;
     onClose();
-    router.push({ pathname: '/survey', params: { siteId: site.id } });
+    router.push({
+      pathname: '/survey',
+      params: { siteId: site.id, siteName: site.name },
+    });
   }
 
   return (
