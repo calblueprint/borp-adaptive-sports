@@ -49,6 +49,23 @@ export default function PrototypeLayout() {
                     contentStyle: { backgroundColor: 'transparent' },
                   }}
                 />
+                {/* No swipe-back mid-survey: the × pauses and returns to the trail instead */}
+                <Stack.Screen
+                  name="survey/[id]/session"
+                  options={{
+                    gestureEnabled: false,
+                    fullScreenGestureEnabled: false,
+                  }}
+                />
+                {/* Sent replaces Review; there's no going back into a finished survey */}
+                <Stack.Screen
+                  name="survey/[id]/sent"
+                  options={{
+                    gestureEnabled: false,
+                    fullScreenGestureEnabled: false,
+                    animation: 'fade',
+                  }}
+                />
                 {/* Home and Profile; switching between them happens inside, with no transition */}
                 <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
               </Stack>

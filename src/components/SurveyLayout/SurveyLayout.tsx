@@ -29,7 +29,7 @@ type ScreenProps = {
 };
 
 /** Scrolling survey step with a back button, a step label and a pinned bottom bar. */
-export function SurveyScreen({
+export function SurveyLayout({
   step,
   eyebrow,
   title,

@@ -491,10 +491,16 @@ function SurveyCta({ trail }: { trail: Trail }) {
   const { session, primerSeen } = useSurvey();
   const mine = session?.trailId === trail.id ? session : null;
   const elapsed = useElapsed(mine);
-  // The survey screens come next; until then Start and Resume say so
+  const params = { id: trail.id };
   const start = () =>
-    comingSoon(primerSeen ? 'Get ready' : 'The survey primer');
-  const resume = () => comingSoon('The survey session');
+    router.push({
+      pathname: primerSeen
+        ? '/prototype/survey/[id]'
+        : '/prototype/survey/[id]/primer',
+      params,
+    });
+  const resume = () =>
+    router.push({ pathname: '/prototype/survey/[id]/session', params });
   // Just the button: no line of small print under it. The paused time stays with the screen reader.
   return (
     <BottomBar>
