@@ -30,7 +30,27 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "BORP uses your location to show the trails closest to you and to pin new trailheads."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "BORP uses the microphone so you can leave voice notes while you survey a trail.",
+          "enableBackgroundRecording": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "BORP uses the camera so you can add photos while you survey a trail.",
+          "photosPermission": "BORP lets you add photos from your library to trail pins."
+        }
+      ]
     ]
   }
 }
