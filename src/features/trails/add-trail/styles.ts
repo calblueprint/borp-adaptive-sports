@@ -1,0 +1,136 @@
+import { StyleSheet } from 'react-native';
+import { colors, GUTTER, overlay, shadow, trailColors } from '@/styles/theme';
+
+export const PIN = 36;
+
+export default StyleSheet.create({
+  flex: { flex: 1 },
+  screen: { flex: 1, backgroundColor: colors.white },
+  // Modal sheet: content starts below the grabber area, leaving room for the close button
+  content: {
+    paddingTop: 72,
+    paddingHorizontal: GUTTER,
+    paddingBottom: 40,
+    gap: 32,
+  },
+  title: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: '600',
+    letterSpacing: -0.4,
+    color: colors.ink,
+    marginBottom: -12,
+  },
+  fields: { gap: 20 },
+  group: { gap: 8 },
+  pair: { flexDirection: 'row', gap: 10 },
+  half: { width: '50%' },
+  caption: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.tertiary,
+    marginBottom: -8,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+    color: colors.ink,
+  },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pressed: { opacity: 0.6 },
+  help: { gap: 6, marginBottom: 4 },
+  helpText: { fontSize: 15, lineHeight: 21, color: colors.secondary },
+  helpName: { fontWeight: '600', color: colors.ink },
+  unit: { fontSize: 15, color: colors.tertiary },
+  link: { fontSize: 15, fontWeight: '500', color: colors.navy },
+
+  here: { gap: 12 },
+  map: {
+    height: 180,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: trailColors.mapLand,
+  },
+  // Centre the snapshot on the part with paths, not the edge of the image
+  mapImage: {
+    position: 'absolute',
+    left: -80,
+    right: -80,
+    top: -260,
+    height: 720,
+  },
+  veil: { backgroundColor: overlay.veil },
+  mapCenter: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pinButton: {
+    height: 48,
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    alignSelf: 'center',
+  },
+  pin: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    marginLeft: -PIN / 2,
+    marginTop: -PIN - 6,
+    alignItems: 'center',
+  },
+  pinHead: {
+    width: PIN,
+    height: PIN,
+    borderRadius: PIN / 2,
+    backgroundColor: colors.navy,
+    borderWidth: 2.5,
+    borderColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow.pin,
+  },
+  pinTip: {
+    width: 3,
+    height: 8,
+    marginTop: -1,
+    borderRadius: 1.5,
+    backgroundColor: colors.navy,
+  },
+  hereRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  hereName: { fontSize: 17, fontWeight: '600', color: colors.ink },
+  hereCoords: {
+    fontSize: 13,
+    color: colors.tertiary,
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
+  },
+
+  notes: {
+    minHeight: 96,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 14,
+    fontSize: 15,
+    color: colors.ink,
+    textAlignVertical: 'top',
+    backgroundColor: colors.fill,
+    outlineWidth: 0,
+    outlineColor: 'transparent',
+  },
+
+  cta: {
+    paddingTop: 12,
+    paddingHorizontal: GUTTER,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.hairline,
+  },
+  ctaButton: { height: 56, borderRadius: 28 },
+  close: { top: 16, right: 16 },
+});
