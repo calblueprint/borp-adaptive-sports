@@ -9,7 +9,6 @@ type PasswordRuleProps = {
   met: boolean;
 };
 
-// One password requirement: green check when met, gray X when not
 export default function PasswordRule({ text, met }: PasswordRuleProps) {
   return (
     <View style={styles.row}>

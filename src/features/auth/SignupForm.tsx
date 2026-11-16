@@ -108,7 +108,7 @@ export default function SignupForm() {
       <FormScreen
         title="Check your email"
         subtitle={`Enter the verification code sent to ${sentEmail}.`}
-        onBack={goBack}
+        onBack={changeEmail}
         footer={
           <Button
             text={busy ? 'Verifying…' : 'Verify code'}

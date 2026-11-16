@@ -19,7 +19,9 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       <Header />
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to BORP, {profile?.name}!</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          Welcome to BORP, {profile?.name}!
+        </Text>
         <Text style={styles.subtitle}>Signed in as {session?.user.email}</Text>
         {error && (
           <Text style={styles.error} accessibilityRole="alert">

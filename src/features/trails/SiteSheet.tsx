@@ -35,7 +35,9 @@ export default function SiteSheet({ site, onClose }: SiteSheetProps) {
         {site && (
           <View style={styles.sheet}>
             <Image source={fillerImage} style={styles.sheetImage} />
-            <Text style={styles.sheetName}>{site.name}</Text>
+            <Text style={styles.sheetName} accessibilityRole="header">
+              {site.name}
+            </Text>
             <Button text="Start survey" onPress={startSurvey} />
             <Pressable
               accessibilityRole="button"

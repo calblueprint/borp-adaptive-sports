@@ -9,7 +9,6 @@ import Speed1 from '~/assets/welcome-logo/speed1.svg';
 import Speed2 from '~/assets/welcome-logo/speed2.svg';
 import styles from './styles';
 
-// White BORP logo (wheelchair + wordmark), layered exactly like the Figma file
 export default function WelcomeLogo() {
   return (
     <View

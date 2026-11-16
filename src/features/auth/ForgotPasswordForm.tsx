@@ -150,7 +150,7 @@ export default function ForgotPasswordForm() {
       <FormScreen
         title="Check your email"
         subtitle={`Enter the recovery code sent to ${sentEmail}.`}
-        onBack={goBack}
+        onBack={changeEmail}
         footer={
           <Button
             text={busy ? 'Please wait…' : 'Verify code'}

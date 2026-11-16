@@ -44,7 +44,9 @@ export default function FormScreen({
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.heading}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title} accessibilityRole="header">
+              {title}
+            </Text>
             {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
           </View>
           <View style={styles.body}>{children}</View>

@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
           />
         </View>
         <Text style={styles.policy}>
-          By continuing, you agree to Borp’s{' '}
+          By continuing, you agree to BORP’s{' '}
           <Text style={styles.policyLink}>Usage Policy</Text> and acknowledge
           their <Text style={styles.policyLink}>Privacy Policy</Text>.
         </Text>

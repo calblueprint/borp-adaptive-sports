@@ -120,7 +120,12 @@ export default function SurveyScreen() {
 
           {Object.entries(sections).map(([sectionName, questions]) => (
             <View key={sectionName} style={styles.section}>
-              <Text style={styles.reviewSectionTitle}>{sectionName}</Text>
+              <Text
+                style={styles.reviewSectionTitle}
+                accessibilityRole="header"
+              >
+                {sectionName}
+              </Text>
               {questions.map(q => (
                 <View key={q.column} style={styles.reviewRow}>
                   <Text style={styles.reviewLabel}>{q.label}</Text>
@@ -156,7 +161,9 @@ export default function SurveyScreen() {
 
         {Object.entries(sections).map(([sectionName, questions]) => (
           <View key={sectionName} style={styles.section}>
-            <Text style={styles.sectionTitle}>{sectionName}</Text>
+            <Text style={styles.sectionTitle} accessibilityRole="header">
+              {sectionName}
+            </Text>
             {questions.map(q => (
               <Question
                 key={q.column}
