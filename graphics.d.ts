@@ -5,9 +5,10 @@ declare module '*.png' {
 }
 
 declare module '*.svg' {
-  import { ImageSourcePropType } from 'react-native';
-  const value: ImageSourcePropType;
-  export default value;
+  import { FC } from 'react';
+  import { SvgProps } from 'react-native-svg';
+  const content: FC<SvgProps>;
+  export default content;
 }
 
 declare module '*.jpg' {

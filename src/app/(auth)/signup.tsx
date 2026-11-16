@@ -1,5 +1,5 @@
-import AuthForm from '@/features/auth/AuthForm';
+import SignupForm from '@/features/auth/SignupForm';
 
 export default function SignupScreen() {
-  return <AuthForm mode="signup" />;
+  return <SignupForm />;
 }

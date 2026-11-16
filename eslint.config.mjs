@@ -20,4 +20,18 @@ export default [
       '@typescript-eslint/no-shadow': 'error',
     },
   },
+  {
+    files: ['metro.config.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        require: 'readonly',
+        module: 'writable',
+        __dirname: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 ];

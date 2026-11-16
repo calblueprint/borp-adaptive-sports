@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     void restoreSession();
 
-    function updateRefresh(state: string) {
+    function updateRefresh(state: string | null | undefined) {
       if (state === 'active') supabase.auth.startAutoRefresh();
       else supabase.auth.stopAutoRefresh();
     }

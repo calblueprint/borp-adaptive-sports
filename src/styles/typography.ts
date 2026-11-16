@@ -10,8 +10,6 @@ type TypographyStyles = {
   p3: TextStyle;
 };
 
-// Add more components for different text elements if needed,
-// or edit current component props according to the project's design system
 export const typography: TypographyStyles = StyleSheet.create({
   h1: {
     fontSize: 32,
