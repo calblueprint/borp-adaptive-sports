@@ -2,9 +2,9 @@ import { Stack } from 'expo-router';
 
 export default function AppLayout() {
   return (
-    <Stack screenOptions={{ headerTransparent: false }}>
-      <Stack.Screen name="index" options={{ title: 'Home' }} />
-      <Stack.Screen name="survey/index" options={{ title: 'Survey' }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* No swiping back to the survey after it's sent */}
+      <Stack.Screen name="survey/sent" options={{ gestureEnabled: false }} />
     </Stack>
   );
 }

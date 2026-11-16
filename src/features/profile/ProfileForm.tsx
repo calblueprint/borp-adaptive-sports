@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
+import { ReactNode, useState } from 'react';
+import { Text } from 'react-native';
 import Button from '@/components/Button/Button';
+import FormScreen from '@/components/FormScreen/FormScreen';
+import TextField from '@/components/TextField/TextField';
 import { useAuth } from '@/features/auth/AuthProvider';
+import authStyles from '@/features/auth/styles';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import { createProfile, updateProfile } from '~/api/supabase/queries/profiles';
 
@@ -15,7 +18,8 @@ function normalizePhone(input: string): string | null {
   return null;
 }
 
-export default function ProfileForm() {
+// `children` is shown under the fields (e.g. a log out link)
+export default function ProfileForm({ children }: { children?: ReactNode }) {
   const { session } = useAuth();
   const { profile, reload } = useProfile();
   const [name, setName] = useState(profile?.name ?? '');
@@ -63,21 +67,31 @@ export default function ProfileForm() {
   }
 
   return (
-    <>
-      <Text>Name (required)</Text>
-      <TextInput
+    <FormScreen
+      title="We would love to know you"
+      subtitle="Enter your profile details"
+      footer={
+        <Button
+          text={busy ? 'Saving…' : 'Continue'}
+          disabled={busy || !name.trim() || !phoneNumber.trim()}
+          onPress={() => void submit()}
+        />
+      }
+    >
+      <TextField label="Email" readOnly value={session?.user.email ?? ''} />
+      <TextField
+        label="Name"
         accessibilityLabel="Name (required)"
-        style={styles.input}
         value={name}
         onChangeText={setName}
         autoComplete="name"
         autoCapitalize="words"
         editable={!busy}
       />
-      <Text>Phone number (required)</Text>
-      <TextInput
+      <TextField
+        label="Phone Number"
         accessibilityLabel="Phone number (required)"
-        style={styles.input}
+        helper="For numbers outside the US, start with + and the country code."
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
@@ -85,36 +99,25 @@ export default function ProfileForm() {
         placeholder="510-555-0123"
         editable={!busy}
       />
-      <Text>
-        For numbers outside the US, start with + and the country code.
-      </Text>
-      <Text>Role: {profile?.role ?? 'surveyor'}</Text>
-      <Text>Affiliation (optional)</Text>
-      <TextInput
-        accessibilityLabel="Affiliation (optional)"
-        style={styles.input}
+      <TextField label="Role" readOnly value={profile?.role ?? 'surveyor'} />
+      <TextField
+        label="Affiliation (optional)"
         value={affiliation}
         onChangeText={setAffiliation}
         editable={!busy}
       />
-      <Text>Mobility device (optional)</Text>
-      <TextInput
-        accessibilityLabel="Mobility device (optional)"
-        style={styles.input}
+      <TextField
+        label="Mobility device (optional)"
         value={mobilityDevice}
         onChangeText={setMobilityDevice}
         editable={!busy}
       />
-      {error && <Text accessibilityRole="alert">{error}</Text>}
-      <Button
-        text={busy ? 'Saving…' : 'Save profile'}
-        disabled={busy || !name.trim() || !phoneNumber.trim()}
-        onPress={() => void submit()}
-      />
-    </>
+      {error && (
+        <Text style={authStyles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      )}
+      {children}
+    </FormScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});
