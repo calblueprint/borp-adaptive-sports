@@ -21,21 +21,27 @@ export async function saveDraftSurvey(
 }
 
 // TODO: need to address duplicate survey error, will use updated_at column for that
+// Returns the new survey's id, so photos can be linked to it.
 export async function submitSurvey(
   row: SurveyAnswersRow,
   userId: string,
   siteId: string,
-): Promise<void> {
+): Promise<string> {
   const now = new Date().toISOString();
-  const { error } = await supabase.from('surveys').insert({
-    ...row,
-    site_id: siteId,
-    surveyor_id: userId,
-    status: 'submitted',
-    version: 0,
-    created_at: now,
-    updated_at: now,
-    submitted_at: now,
-  });
+  const { data, error } = await supabase
+    .from('surveys')
+    .insert({
+      ...row,
+      site_id: siteId,
+      surveyor_id: userId,
+      status: 'submitted',
+      version: 0,
+      created_at: now,
+      updated_at: now,
+      submitted_at: now,
+    })
+    .select('id')
+    .single();
   if (error) throw new Error(`Error submitting survey: ${error.message}`);
+  return data.id;
 }

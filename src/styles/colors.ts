@@ -8,6 +8,8 @@ const colors = {
   navy: '#151752',
   success: '#018530',
   fieldFill: '#F6F6F6',
+  controlFill: '#F2F2F2',
+  photoPlaceholder: '#EEEEEE',
   glass: 'rgba(255, 255, 255, 0.72)',
   glassBorder: 'rgba(255, 255, 255, 0.7)',
 };
