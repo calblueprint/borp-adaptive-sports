@@ -94,7 +94,7 @@ export default function SurveyScreen() {
       setSaved(true);
 
       const allPhotos = Object.values(photos).flat();
-      
+
       if (allPhotos.length > 0) {
         const failed = await uploadSurveyPhotos(surveyId, allPhotos);
         if (failed > 0)
