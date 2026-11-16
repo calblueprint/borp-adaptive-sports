@@ -48,6 +48,7 @@ export default function SurveyScreen() {
   const [saved, setSaved] = useState(false);
   const [step, setStep] = useState<'form' | 'pins' | 'review'>('form');
   const [surveyId, setSurveyId] = useState<string | null>(null);
+  const [pinCount, setPinCount] = useState(0);
 
   const setAnswer = (q: QuestionData, value: AnswerValue) => {
     setSaved(false);
@@ -130,6 +131,8 @@ export default function SurveyScreen() {
     return (
       <PinsScreen
         surveyId={surveyId}
+        pinCount={pinCount}
+        onPinAdded={() => setPinCount(c => c + 1)}
         onBack={() => setStep('form')}
         onFinish={() => setStep('review')}
       />

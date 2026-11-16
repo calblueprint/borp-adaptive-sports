@@ -23,13 +23,20 @@ const PIN_TYPES = [
 
 type Props = {
   surveyId: string;
+  pinCount: number;
+  onPinAdded: () => void;
   onBack: () => void;
   onFinish: () => void;
 };
 
-export default function PinsScreen({ surveyId, onBack, onFinish }: Props) {
+export default function PinsScreen({
+  surveyId,
+  pinCount,
+  onPinAdded,
+  onBack,
+  onFinish,
+}: Props) {
   const [notes, setNotes] = useState('');
-  const [count, setCount] = useState(0);
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -38,9 +45,9 @@ export default function PinsScreen({ surveyId, onBack, onFinish }: Props) {
     setMessage('');
     try {
       await addSurveyItem(surveyId, type, notes);
-      setCount(c => c + 1);
+      onPinAdded();
       setNotes('');
-      setMessage(`Pin ${count + 1} saved: ${label}`);
+      setMessage(`Pin ${pinCount + 1} saved: ${label}`);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not save pin.');
     } finally {
@@ -54,7 +61,7 @@ export default function PinsScreen({ surveyId, onBack, onFinish }: Props) {
         <BackButton onPress={onBack} />
         <Text style={styles.eyebrow}>Trail session</Text>
         <Text style={styles.title} accessibilityRole="header">
-          What’s here? Pin {count + 1}
+          What’s here? Pin {pinCount + 1}
         </Text>
 
         <View style={styles.grid}>
