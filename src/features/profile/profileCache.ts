@@ -1,19 +1,32 @@
-import type { Profile } from '~/api/supabase/queries/profiles';
+import type { Profile } from '@/lib/profiles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Constants } from '~/api/supabase/database.types';
 
-const cacheKey = (userId: string) => `borp:profile:v1:${userId}`;
+// Bump when the Profile shape changes, so old saved copies are ignored
+const CACHE_VERSION = 'v1';
+const cacheKey = (userId: string) => `borp:profile:${CACHE_VERSION}:${userId}`;
+
+const isString = (v: unknown) => typeof v === 'string';
+const isStringOrNull = (v: unknown) => v === null || typeof v === 'string';
+
+// One check per Profile field. Typed against Profile, so adding a field to Profile without a check here is a TypeScript error.
+const fieldChecks: Record<keyof Profile, (value: unknown) => boolean> = {
+  id: isString,
+  name: isString,
+  email: isString,
+  // Allowed roles come from the database, so new roles are accepted automatically
+  role: v => (Constants.public.Enums.role as readonly unknown[]).includes(v),
+  phone_number: isStringOrNull,
+  affiliation: isStringOrNull,
+  mobility_device: isStringOrNull,
+};
 
 function isCachedProfile(value: unknown, userId: string): value is Profile {
   if (!value || typeof value !== 'object') return false;
   const profile = value as Record<string, unknown>;
   return (
     profile.id === userId &&
-    typeof profile.name === 'string' &&
-    typeof profile.email === 'string' &&
-    (profile.role === 'surveyor' || profile.role === 'admin') &&
-    [profile.phone_number, profile.affiliation, profile.mobility_device].every(
-      field => field === null || typeof field === 'string',
-    )
+    Object.entries(fieldChecks).every(([field, check]) => check(profile[field]))
   );
 }
 
@@ -29,6 +42,10 @@ export async function readCachedProfile(
     console.warn('Unable to read cached profile', cause);
     return null;
   }
+}
+
+export async function clearCachedProfile(userId: string) {
+  await cacheProfile(userId, null);
 }
 
 export async function cacheProfile(userId: string, profile: Profile | null) {

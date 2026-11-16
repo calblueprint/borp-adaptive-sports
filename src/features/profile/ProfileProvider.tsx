@@ -1,4 +1,4 @@
-import type { Profile } from '~/api/supabase/queries/profiles';
+import type { Profile } from '@/lib/profiles';
 import {
   createContext,
   useCallback,
@@ -15,6 +15,7 @@ type ProfileState = {
   profile: Profile | null;
   error: string | null;
 };
+
 const ProfileContext = createContext<{
   profile: Profile | null;
   isLoading: boolean;
