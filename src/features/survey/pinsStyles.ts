@@ -9,11 +9,11 @@ export default StyleSheet.create({
   typeButton: {
     width: '30%',
     flexGrow: 1,
-    padding: 16,
+    padding: 12,
     borderRadius: 12,
     backgroundColor: '#f1f1f1',
   },
-  typeButtonText: { fontSize: 16, fontWeight: '600' },
+  typeButtonText: { fontSize: 14, fontWeight: '600' },
   notes: {
     minHeight: 96,
     padding: 12,
