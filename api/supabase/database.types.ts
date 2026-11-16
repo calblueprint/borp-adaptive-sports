@@ -91,28 +91,46 @@ export type Database = {
       };
       sites: {
         Row: {
+          city: string | null;
+          county: string | null;
           created_at: string;
           created_by: string;
           id: string;
           lat: number;
           lng: number;
           name: string;
+          notes: string | null;
+          park: string | null;
+          surface_type: string | null;
+          trail_length_m: number | null;
         };
         Insert: {
+          city?: string | null;
+          county?: string | null;
           created_at?: string;
           created_by: string;
           id?: string;
           lat: number;
           lng: number;
           name: string;
+          notes?: string | null;
+          park?: string | null;
+          surface_type?: string | null;
+          trail_length_m?: number | null;
         };
         Update: {
+          city?: string | null;
+          county?: string | null;
           created_at?: string;
           created_by?: string;
           id?: string;
           lat?: number;
           lng?: number;
           name?: string;
+          notes?: string | null;
+          park?: string | null;
+          surface_type?: string | null;
+          trail_length_m?: number | null;
         };
         Relationships: [
           {

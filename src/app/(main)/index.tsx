@@ -1,1 +1,1 @@
-export { default } from '@/features/home/HomeScreen';
+export { default } from '@/features/trails/TrailsScreen';
