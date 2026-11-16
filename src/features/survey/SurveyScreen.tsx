@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
 import Question from '@/components/Question/Question';
@@ -15,7 +15,7 @@ import {
   validateAll,
   validateAnswer,
 } from '@/lib/survey';
-import { submitSurvey } from '~/api/supabase/queries/query';
+import { submitSurvey } from '~/api/supabase/queries/surveys';
 import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
@@ -35,6 +35,10 @@ const formatAnswer = (v: AnswerValue | undefined) => {
 
 export default function SurveyScreen() {
   const { session } = useAuth();
+  const { siteId, siteName } = useLocalSearchParams<{
+    siteId?: string;
+    siteName?: string;
+  }>();
   const router = useRouter();
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -67,13 +71,14 @@ export default function SurveyScreen() {
   };
 
   const handleSave = async () => {
+    if (!siteId) return;
     if (!session) {
       setMessage('Please log in first.');
       return;
     }
     setSaving(true);
     try {
-      await submitSurvey(toRow(answers), session.user.id);
+      await submitSurvey(toRow(answers), session.user.id, siteId);
       setSaved(true);
       router.replace('/survey/sent');
     } catch (e) {
@@ -83,6 +88,23 @@ export default function SurveyScreen() {
     }
   };
 
+  // Only reachable through a bad link; normal use always passes a siteId.
+  if (!siteId) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.container}>
+          <BackButton style={styles.backButton} />
+          <Text style={styles.title} accessibilityRole="header">
+            No site selected
+          </Text>
+          <Link href="/trails" replace>
+            Choose a site
+          </Link>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (step === 'review') {
     return (
       <SafeAreaView style={styles.safe}>
@@ -91,8 +113,10 @@ export default function SurveyScreen() {
             style={styles.backButton}
             onPress={() => setStep('form')}
           />
-          <Text style={styles.eyebrow}>Trail survey</Text>
-          <Text style={styles.title}>Review and send</Text>
+          <Text style={styles.eyebrow}>{siteName ?? 'Trail survey'}</Text>
+          <Text style={styles.title} accessibilityRole="header">
+            Review and send
+          </Text>
 
           {Object.entries(sections).map(([sectionName, questions]) => (
             <View key={sectionName} style={styles.section}>
@@ -125,7 +149,10 @@ export default function SurveyScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <BackButton style={styles.backButton} />
-        <Text style={styles.title}>Trail Survey</Text>
+        {siteName && <Text style={styles.eyebrow}>Trail survey</Text>}
+        <Text style={styles.title} accessibilityRole="header">
+          {siteName ?? 'Trail Survey'}
+        </Text>
 
         {Object.entries(sections).map(([sectionName, questions]) => (
           <View key={sectionName} style={styles.section}>

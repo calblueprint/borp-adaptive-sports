@@ -29,7 +29,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Button text="Start survey" onPress={() => router.push('/survey')} />
+        <Button text="Search trails" onPress={() => router.push('/trails')} />
         <TextLink
           text={busy ? 'Logging out…' : 'Log out'}
           disabled={busy}
