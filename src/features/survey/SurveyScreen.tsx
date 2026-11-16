@@ -15,7 +15,8 @@ import {
   validateAll,
   validateAnswer,
 } from '@/lib/survey';
-import { submitSurvey } from '~/api/supabase/queries/surveys';
+import { saveDraftSurvey, submitSurvey } from '~/api/supabase/queries/surveys';
+import PinsScreen from './PinsScreen';
 import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
@@ -45,7 +46,8 @@ export default function SurveyScreen() {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [step, setStep] = useState<'form' | 'review'>('form');
+  const [step, setStep] = useState<'form' | 'pins' | 'review'>('form');
+  const [surveyId, setSurveyId] = useState<string | null>(null);
 
   const setAnswer = (q: QuestionData, value: AnswerValue) => {
     setSaved(false);
@@ -59,26 +61,45 @@ export default function SurveyScreen() {
     });
   };
 
-  const handleReview = () => {
+  const handleStart = async () => {
     const found = validateAll(answers);
     setErrors(found);
     if (Object.keys(found).length > 0) {
       setMessage('Fix the highlighted answers first.');
       return;
     }
-    setMessage('');
-    setStep('review');
-  };
-
-  const handleSave = async () => {
     if (!siteId) return;
     if (!session) {
       setMessage('Please log in first.');
       return;
     }
+    setMessage('');
     setSaving(true);
     try {
-      await submitSurvey(toRow(answers), session.user.id, siteId);
+      if (!surveyId) {
+        const id = await saveDraftSurvey(
+          toRow(answers),
+          session.user.id,
+          siteId,
+        );
+        setSurveyId(id);
+      }
+      setStep('pins');
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Could not start survey.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!surveyId) {
+      setMessage('Start the trail session first.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await submitSurvey(toRow(answers), surveyId);
       setSaved(true);
       router.replace('/survey/sent');
     } catch (e) {
@@ -88,7 +109,7 @@ export default function SurveyScreen() {
     }
   };
 
-  // Only reachable through a bad link; normal use always passes a siteId.
+  // Only reachable through a bad link; normal use always passes a siteId
   if (!siteId) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -105,13 +126,23 @@ export default function SurveyScreen() {
     );
   }
 
+  if (step === 'pins' && surveyId) {
+    return (
+      <PinsScreen
+        surveyId={surveyId}
+        onBack={() => setStep('form')}
+        onFinish={() => setStep('review')}
+      />
+    );
+  }
+
   if (step === 'review') {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container}>
           <BackButton
             style={styles.backButton}
-            onPress={() => setStep('form')}
+            onPress={() => setStep('pins')}
           />
           <Text style={styles.eyebrow}>{siteName ?? 'Trail survey'}</Text>
           <Text style={styles.title} accessibilityRole="header">
@@ -170,8 +201,9 @@ export default function SurveyScreen() {
         ))}
 
         <Button
-          text="Review"
-          onPress={handleReview}
+          text={saving ? 'Starting…' : 'Start trail session'}
+          onPress={handleStart}
+          disabled={saving}
           style={styles.reviewButton}
         />
         {message !== '' && <Text style={styles.message}>{message}</Text>}
