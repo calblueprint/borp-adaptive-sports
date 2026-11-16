@@ -17,11 +17,7 @@ export type SurveyAnswersRow = Omit<
 >;
 
 export type QuestionType =
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'single_select'
-  | 'multi_select';
+  'text' | 'number' | 'boolean' | 'single_select' | 'multi_select';
 
 export type Question = {
   section: string;
