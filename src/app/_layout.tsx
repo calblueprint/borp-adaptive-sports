@@ -12,7 +12,7 @@ function AuthNavigator() {
   if (isLoading)
     return (
       <ActivityIndicator
-        accessibilityLabel="Restoring session"
+        accessibilityLabel={isLoading ? 'Restoring session' : 'Loading profile'}
         style={{ flex: 1 }}
       />
     );

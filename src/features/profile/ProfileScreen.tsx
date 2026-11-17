@@ -71,6 +71,20 @@ export default function ProfileScreen() {
           <Text style={styles.meta}>Compare trails with your limits</Text>
         </Pressable>
 
+        {profile?.role === 'admin' && (
+          <>
+            <Text style={styles.heading}>Admin</Text>
+            <Pressable
+              onPress={() => router.push('/admin')}
+              style={styles.row}
+              accessibilityRole="link"
+            >
+              <Text style={styles.rowTitle}>Admin dashboard</Text>
+              <Text style={styles.meta}>Review sites and surveys</Text>
+            </Pressable>
+          </>
+        )}
+
         <Text style={styles.heading}>Surveys</Text>
         {surveysError && (
           <Text style={styles.error}>Error: {surveysError}</Text>
