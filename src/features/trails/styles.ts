@@ -1,0 +1,78 @@
+import { StyleSheet } from 'react-native';
+import colors from '@/styles/colors';
+import { tabBarClearance } from '@/styles/layout';
+import { typography } from '@/styles/typography';
+
+export default StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.white },
+  page: { backgroundColor: colors.white },
+  content: { padding: 16, paddingBottom: tabBarClearance, gap: 16 },
+  searchHeading: { ...typography.h3, color: colors.black },
+  retryButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  loadError: { gap: 4, alignItems: 'flex-start' },
+  retryText: {
+    ...typography.p2,
+    color: colors.black,
+    textDecorationLine: 'underline',
+  },
+  addButton: {
+    position: 'absolute',
+    right: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.black,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  addButtonPressed: { opacity: 0.8 },
+  addIcon: { fontSize: 36, lineHeight: 40, color: colors.white },
+  search: {
+    ...typography.p1,
+    backgroundColor: colors.white,
+    borderRadius: 999,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    color: colors.black,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  error: { ...typography.p2, color: colors.red },
+
+  card: { gap: 6 },
+  image: { width: '100%', height: 200, borderRadius: 20 },
+  name: { ...typography.p1, fontWeight: '600', color: colors.black },
+  meta: { ...typography.p2, color: colors.gray },
+  backdrop: { flex: 1, justifyContent: 'flex-end' },
+  // Fades in and out separately from the sheet (see SiteSheet)
+  scrim: { backgroundColor: 'rgba(0, 0, 0, 0.4)' },
+  sheet: {
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
+    maxHeight: '94%',
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+    gap: 12,
+  },
+  formSheet: { height: '94%', padding: 0, gap: 0, overflow: 'hidden' },
+  sheetImage: { width: '100%', height: 180, borderRadius: 20 },
+  sheetName: { ...typography.h3, color: colors.black },
+  close: { alignSelf: 'center', padding: 8 },
+  closeText: { ...typography.p2, color: colors.gray },
+});

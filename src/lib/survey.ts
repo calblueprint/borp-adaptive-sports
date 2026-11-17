@@ -263,3 +263,16 @@ export function toRow(answers: Answers): SurveyAnswersRow {
   }
   return row as SurveyAnswersRow;
 }
+
+// What a surveyor can pin during a trail session (survey_items.type)
+export const PIN_TYPES = [
+  { value: 'narrow_spot', label: 'Narrow spot' },
+  { value: 'steep_stretch', label: 'Steep stretch' },
+  { value: 'tilted_path', label: 'Tilted path' },
+  { value: 'surface', label: 'Surface' },
+  { value: 'obstacle', label: 'Obstacle' },
+  { value: 'something_else', label: 'Something else' },
+];
+
+export const pinTypeLabel = (type: string) =>
+  PIN_TYPES.find(t => t.value === type)?.label ?? type;
