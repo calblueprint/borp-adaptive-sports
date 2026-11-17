@@ -1,11 +1,19 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput } from 'react-native';
+import { Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
+import FormScreen from '@/components/FormScreen/FormScreen';
+import TextField from '@/components/TextField/TextField';
+import { useAuth } from '@/features/auth/AuthProvider';
 import supabase from '~/api/supabase/client';
+import PasswordRule from './PasswordRule';
+import styles from './styles';
 
+// Shown right after email verification. No back or log out here:
+// leaving now would strand an account with no password.
 export default function SetPasswordForm() {
+  const { session } = useAuth();
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,6 +24,10 @@ export default function SetPasswordForm() {
       setError('Use at least 8 characters.');
       return;
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match. Please try again.');
+      return;
+    }
     setBusy(true);
     try {
       const { error: passwordError } = await supabase.auth.updateUser({
@@ -24,6 +36,7 @@ export default function SetPasswordForm() {
       });
       if (passwordError) throw passwordError;
       setPassword('');
+      setConfirmPassword('');
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -36,34 +49,52 @@ export default function SetPasswordForm() {
   }
 
   return (
-    <>
-      <Text>Set your password</Text>
-      <TextInput
-        accessibilityLabel="New password"
-        style={styles.input}
+    <FormScreen
+      title="Your email is verified"
+      subtitle="Please set your password"
+      footer={
+        <Button
+          text={busy ? 'Saving…' : 'Continue'}
+          disabled={busy || password.length < 8 || !confirmPassword}
+          onPress={() => void submit()}
+        />
+      }
+    >
+      <TextField label="Email" readOnly value={session?.user.email ?? ''} />
+      <TextField
+        label="Password"
+        secure
         value={password}
         onChangeText={setPassword}
-        secureTextEntry={!showPassword}
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="new-password"
         editable={!busy}
       />
-      <Text>Use at least 8 characters.</Text>
-      <Button
-        text={showPassword ? 'Hide password' : 'Show password'}
-        onPress={() => setShowPassword(value => !value)}
+      <TextField
+        label="Confirm password"
+        secure
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        editable={!busy}
+        returnKeyType="done"
+        onSubmitEditing={() => void submit()}
       />
-      {error && <Text accessibilityRole="alert">{error}</Text>}
-      <Button
-        text={busy ? 'Saving…' : 'Continue'}
-        disabled={busy || password.length < 8}
-        onPress={() => void submit()}
-      />
-    </>
+      <View style={styles.rules}>
+        <PasswordRule text="At least 8 characters" met={password.length >= 8} />
+        <PasswordRule
+          text="Passwords match"
+          met={!!password && password === confirmPassword}
+        />
+      </View>
+      {error && (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      )}
+    </FormScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: { borderWidth: 1, borderColor: '#888', borderRadius: 4, padding: 12 },
-});

@@ -1,6 +1,9 @@
 import type { Site } from '@/lib/sites';
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import Header from '@/components/Header/Header';
 import { searchSites } from '@/lib/sites';
 import colors from '@/styles/colors';
 import { fetchSites } from '~/api/supabase/queries/sites';
@@ -9,6 +12,7 @@ import SiteSheet from './SiteSheet';
 import styles from './styles';
 
 export default function TrailsScreen() {
+  const router = useRouter();
   const [sites, setSites] = useState<Site[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -34,7 +38,8 @@ export default function TrailsScreen() {
   const results = searchSites(sites, query);
 
   return (
-    <>
+    <SafeAreaView style={styles.safe}>
+      <Header onBack={() => router.back()} />
       <ScrollView
         style={styles.page}
         contentContainerStyle={styles.content}
@@ -60,6 +65,6 @@ export default function TrailsScreen() {
       </ScrollView>
 
       <SiteSheet site={selected} onClose={() => setSelected(null)} />
-    </>
+    </SafeAreaView>
   );
 }

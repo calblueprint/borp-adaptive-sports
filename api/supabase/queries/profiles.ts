@@ -1,21 +1,6 @@
+import type { Profile, ProfileDetails } from '@/lib/profiles';
 import type { User } from '@supabase/supabase-js';
 import supabase from '../client';
-
-export type Profile = {
-  id: string;
-  name: string;
-  phone_number: string | null;
-  email: string;
-  role: 'surveyor' | 'admin';
-  affiliation: string | null;
-  mobility_device: string | null;
-  created_at: string;
-};
-
-export type ProfileDetails = Pick<
-  Profile,
-  'name' | 'phone_number' | 'affiliation' | 'mobility_device'
->;
 
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
@@ -24,7 +9,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
       'id, name, email, role, phone_number, affiliation, mobility_device, created_at',
     )
     .eq('id', userId)
-    .maybeSingle<Profile>();
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

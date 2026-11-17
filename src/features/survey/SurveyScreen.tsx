@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
+import PhotoPicker from '@/components/PhotoPicker/PhotoPicker';
 import Question from '@/components/Question/Question';
 import { useAuth } from '@/features/auth/AuthProvider';
+import Camera from '@/icons/camera.svg';
 import {
-  Answers,
   AnswerValue,
   Question as QuestionData,
   questionList,
@@ -15,8 +16,12 @@ import {
   validateAll,
   validateAnswer,
 } from '@/lib/survey';
-import { submitSurvey } from '~/api/supabase/queries/surveys';
+import {
+  findDraftSurvey,
+  saveDraftSurvey,
+} from '~/api/supabase/queries/surveys';
 import styles from './styles';
+import { useSurvey } from './SurveyProvider';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
@@ -26,13 +31,6 @@ const sections = questionList.reduce<Record<string, QuestionData[]>>(
   {},
 );
 
-const formatAnswer = (v: AnswerValue | undefined) => {
-  if (v === undefined || v === null || v === '') return '—';
-  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
-  if (Array.isArray(v)) return v.length ? v.join(', ') : '—';
-  return String(v);
-};
-
 export default function SurveyScreen() {
   const { session } = useAuth();
   const { siteId, siteName } = useLocalSearchParams<{
@@ -40,15 +38,15 @@ export default function SurveyScreen() {
     siteName?: string;
   }>();
   const router = useRouter();
-  const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [step, setStep] = useState<'form' | 'review'>('form');
+  const { answers, setAnswers, photos, setPhotos, surveyId, startSession } =
+    useSurvey();
+  const starting = useRef(false);
+  const [openPhotos, setOpenPhotos] = useState<Record<string, boolean>>({});
 
   const setAnswer = (q: QuestionData, value: AnswerValue) => {
-    setSaved(false);
     setAnswers(prev => ({ ...prev, [q.column]: value }));
     const error = validateAnswer(q, value);
     setErrors(prev => {
@@ -59,36 +57,43 @@ export default function SurveyScreen() {
     });
   };
 
-  const handleReview = () => {
+  const handleStart = async () => {
     const found = validateAll(answers);
     setErrors(found);
     if (Object.keys(found).length > 0) {
       setMessage('Fix the highlighted answers first.');
       return;
     }
-    setMessage('');
-    setStep('review');
-  };
-
-  const handleSave = async () => {
     if (!siteId) return;
     if (!session) {
       setMessage('Please log in first.');
       return;
     }
+    if (starting.current) return;
+    starting.current = true;
+    setMessage('');
     setSaving(true);
+
     try {
-      await submitSurvey(toRow(answers), session.user.id, siteId);
-      setSaved(true);
-      router.replace('/survey/sent');
+      if (!surveyId) {
+        // Pick up an unfinished draft for this site instead of making another
+        const draftId = await findDraftSurvey(session.user.id, siteId);
+        startSession(
+          draftId ??
+            (await saveDraftSurvey(toRow(answers), session.user.id, siteId)),
+          siteName ?? null,
+        );
+      }
+      router.push('/survey/session');
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Could not send survey.');
+      setMessage(e instanceof Error ? e.message : 'Could not start survey.');
     } finally {
+      starting.current = false;
       setSaving(false);
     }
   };
 
-  // Only reachable through a bad link; normal use always passes a siteId.
+  // Only reachable through a bad link; normal use always passes a siteId
   if (!siteId) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -105,46 +110,6 @@ export default function SurveyScreen() {
     );
   }
 
-  if (step === 'review') {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <ScrollView contentContainerStyle={styles.container}>
-          <BackButton
-            style={styles.backButton}
-            onPress={() => setStep('form')}
-          />
-          <Text style={styles.eyebrow}>{siteName ?? 'Trail survey'}</Text>
-          <Text style={styles.title} accessibilityRole="header">
-            Review and send
-          </Text>
-
-          {Object.entries(sections).map(([sectionName, questions]) => (
-            <View key={sectionName} style={styles.section}>
-              <Text style={styles.reviewSectionTitle}>{sectionName}</Text>
-              {questions.map(q => (
-                <View key={q.column} style={styles.reviewRow}>
-                  <Text style={styles.reviewLabel}>{q.label}</Text>
-                  <Text style={styles.reviewValue}>
-                    {formatAnswer(answers[q.column])}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ))}
-          {message !== '' && <Text style={styles.message}>{message}</Text>}
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <Button
-            text={saving ? 'Sending…' : 'Send to BORP'}
-            onPress={handleSave}
-            disabled={saving || saved}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -156,7 +121,39 @@ export default function SurveyScreen() {
 
         {Object.entries(sections).map(([sectionName, questions]) => (
           <View key={sectionName} style={styles.section}>
-            <Text style={styles.sectionTitle}>{sectionName}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle} accessibilityRole="header">
+                {sectionName}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Add a photo of ${sectionName.toLowerCase()}`}
+                accessibilityState={{ expanded: !!openPhotos[sectionName] }}
+                onPress={() =>
+                  setOpenPhotos(prev => ({
+                    ...prev,
+                    [sectionName]: !prev[sectionName],
+                  }))
+                }
+                style={({ pressed }) => [
+                  styles.cameraButton,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Camera width={20} height={20} />
+              </Pressable>
+            </View>
+            {(openPhotos[sectionName] ||
+              (photos[sectionName]?.length ?? 0) > 0) && (
+              <View style={styles.photoPicker}>
+                <PhotoPicker
+                  photos={photos[sectionName] ?? []}
+                  onChange={next =>
+                    setPhotos(prev => ({ ...prev, [sectionName]: next }))
+                  }
+                />
+              </View>
+            )}
             {questions.map(q => (
               <Question
                 key={q.column}
@@ -170,8 +167,9 @@ export default function SurveyScreen() {
         ))}
 
         <Button
-          text="Review"
-          onPress={handleReview}
+          text={saving ? 'Starting…' : 'Start trail session'}
+          onPress={handleStart}
+          disabled={saving}
           style={styles.reviewButton}
         />
         {message !== '' && <Text style={styles.message}>{message}</Text>}
