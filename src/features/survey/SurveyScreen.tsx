@@ -18,9 +18,9 @@ import {
   validateAll,
   validateAnswer,
 } from '@/lib/survey';
+import { uploadSurveyPhotos } from '~/api/supabase/queries/photos';
 import { saveDraftSurvey, submitSurvey } from '~/api/supabase/queries/surveys';
 import PinsScreen from './PinsScreen';
-import { uploadSurveyPhotos } from '~/api/supabase/queries/photos';
 import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
@@ -82,7 +82,7 @@ export default function SurveyScreen() {
     }
     setMessage('');
     setSaving(true);
-    
+
     try {
       if (!surveyId) {
         const id = await saveDraftSurvey(
