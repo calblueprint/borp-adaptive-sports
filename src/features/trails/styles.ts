@@ -7,14 +7,8 @@ export default StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.white },
   page: { backgroundColor: colors.white },
   content: { padding: 16, paddingBottom: tabBarClearance, gap: 16 },
-  accountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  searchHeading: { ...typography.h3, color: colors.black, flexShrink: 1 },
-  accountButton: {
+  searchHeading: { ...typography.h3, color: colors.black },
+  retryButton: {
     paddingHorizontal: 8,
     paddingVertical: 12,
     minHeight: 44,

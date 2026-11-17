@@ -13,9 +13,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Header from '@/components/Header/Header';
-import { useSignOut } from '@/features/auth/useSignOut';
 import { searchSites } from '@/lib/sites';
 import colors from '@/styles/colors';
 import { fetchSites } from '~/api/supabase/queries/sites';
@@ -24,9 +22,7 @@ import SiteSheet from './SiteSheet';
 import styles from './styles';
 
 export default function TrailsScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { signOut, busy: signingOut, error: signOutError } = useSignOut();
   const [sites, setSites] = useState<Site[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -83,34 +79,15 @@ export default function TrailsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
-      <Header onBack={router.canGoBack() ? () => router.back() : undefined} />
+      <Header />
       <ScrollView
         style={styles.page}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + 100 },
-        ]}
+        contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.accountRow}>
-          <Text style={styles.searchHeading}>Find a trail</Text>
-          <Pressable
-            accessibilityRole="button"
-            disabled={signingOut}
-            accessibilityState={{ disabled: signingOut }}
-            onPress={() => void signOut()}
-            style={styles.accountButton}
-          >
-            <Text style={styles.closeText}>
-              {signingOut ? 'Logging out…' : 'Log out'}
-            </Text>
-          </Pressable>
-        </View>
-        {signOutError && (
-          <Text style={styles.error} accessibilityRole="alert">
-            {signOutError}
-          </Text>
-        )}
+        <Text style={styles.searchHeading} accessibilityRole="header">
+          Find a trail
+        </Text>
         <TextInput
           accessibilityLabel="Search trails"
           style={styles.search}
@@ -135,7 +112,7 @@ export default function TrailsScreen() {
             <Pressable
               accessibilityRole="button"
               onPress={() => setReload(value => value + 1)}
-              style={styles.accountButton}
+              style={styles.retryButton}
             >
               <Text style={styles.retryText}>Try again</Text>
             </Pressable>
