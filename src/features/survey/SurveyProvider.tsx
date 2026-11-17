@@ -1,33 +1,43 @@
+import type { LocalPhoto } from '@/lib/photos';
+import type { Answers } from '@/lib/survey';
 import { createContext, useContext, useState } from 'react';
 
-// Shared by the survey routes (form/review, live session, sent) so the
-// session screen can hand off to review without losing the form's state.
+// State shared by the survey routes (form -> session -> review -> sent).
 // The survey layout mounts it, so it resets on every new survey.
-type SurveyStep = 'form' | 'review';
-
-const SurveyContext = createContext<{
+type SurveyContextValue = {
+  // Pre-survey answers and photos, keyed by question column / section name
+  answers: Answers;
+  setAnswers: React.Dispatch<React.SetStateAction<Answers>>;
+  photos: Record<string, LocalPhoto[]>;
+  setPhotos: React.Dispatch<React.SetStateAction<Record<string, LocalPhoto[]>>>;
   surveyId: string | null;
-  setSurveyId: (id: string) => void;
-  itemCount: number;
-  addItem: () => void;
-  step: SurveyStep;
-  setStep: (step: SurveyStep) => void;
-} | null>(null);
+  siteName: string | null;
+  startSession: (surveyId: string, siteName: string | null) => void;
+};
+
+const SurveyContext = createContext<SurveyContextValue | null>(null);
 
 export function SurveyProvider({ children }: { children: React.ReactNode }) {
+  const [answers, setAnswers] = useState<Answers>({});
+  const [photos, setPhotos] = useState<Record<string, LocalPhoto[]>>({});
   const [surveyId, setSurveyId] = useState<string | null>(null);
-  const [itemCount, setItemCount] = useState(0);
-  const [step, setStep] = useState<SurveyStep>('form');
+  const [siteName, setSiteName] = useState<string | null>(null);
+
+  const startSession = (id: string, name: string | null) => {
+    setSurveyId(id);
+    setSiteName(name);
+  };
 
   return (
     <SurveyContext.Provider
       value={{
+        answers,
+        setAnswers,
+        photos,
+        setPhotos,
         surveyId,
-        setSurveyId,
-        itemCount,
-        addItem: () => setItemCount(c => c + 1),
-        step,
-        setStep,
+        siteName,
+        startSession,
       }}
     >
       {children}

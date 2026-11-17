@@ -2,6 +2,8 @@ const colors = {
   black: '#000000',
   white: '#FBFBFB',
   gray: '#777777',
+  textSecondary: 'rgba(0, 0, 0, 0.56)',
+  textTertiary: 'rgba(0, 0, 0, 0.45)',
   lightGray: '#CCCCCC',
   red: '#B00020',
   blue: '#0066CC',
