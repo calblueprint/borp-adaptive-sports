@@ -16,8 +16,6 @@ export default function TabsLayout() {
           bottom: tabBar.bottom,
           alignSelf: 'center',
           backgroundColor: colors.glass,
-          borderColor: colors.glassBorder,
-          borderWidth: 1,
           borderRadius: 999,
           height: tabBar.height,
           width: 140,
@@ -27,6 +25,22 @@ export default function TabsLayout() {
           shadowRadius: 10,
           elevation: 5,
           paddingHorizontal: 4,
+          // The floating bar sits above the home indicator, so drop the
+          // safe-area padding react-navigation adds by default.
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+        tabBarItemStyle: {
+          height: tabBar.height - 2, // minus top/bottom border
+          padding: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        // Default icon wrapper is ~31x28; size it to our pill so it stays centered.
+        tabBarIconStyle: {
+          width: styles.iconContainer.width,
+          height: styles.iconContainer.height,
+          transform: [{ translateY: -1 }], // optical centering nudge
         },
       }}
     >
