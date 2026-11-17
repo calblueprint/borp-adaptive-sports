@@ -87,3 +87,17 @@ View the list of development scripts in the `package.json` file. Each script can
 ```sh
 npm run <insert script name here>
 ```
+
+### Testing
+
+Tests use [Jest](https://jestjs.io/) with the `jest-expo` preset.
+
+```sh
+pnpm test          # run every test once
+pnpm test:watch    # re-run tests on every save
+```
+
+- Put a test next to the file it tests, named `<file>.test.ts`. For example, `src/lib/survey.ts` is tested by `src/lib/survey.test.ts`.
+- Path aliases work the same as in the app (`@/lib/...`, `~/api/...`).
+- The pure logic in `src/lib/` is the easiest place to start, since it has no screens or network calls.
+- CI runs the tests on every pull request.

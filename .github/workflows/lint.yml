@@ -69,3 +69,9 @@ jobs:
       ################################
       - name: Run TypeScript compiler (tsc)
         run: pnpm exec tsc --noEmit
+
+      ################################
+      # Run Jest tests               #
+      ################################
+      - name: Run tests
+        run: pnpm test --passWithNoTests

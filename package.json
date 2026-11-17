@@ -11,6 +11,8 @@
     "prettier:check": "pnpm exec prettier --check .",
     "prettier:fix": "pnpm exec prettier --write .",
     "typecheck": "pnpm exec tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "gen:types": "pnpm dlx supabase gen types typescript --project-id txhzxdlcsjsoayosbjpb > api/supabase/database.types.ts && pnpm exec prettier --write api/supabase/database.types.ts",
     "prepare": "husky",
     "pre-commit": "(pnpm run typecheck || true) && (pnpm run lint:check || true) && pnpm run prettier:check",
@@ -39,6 +41,7 @@
     "@eslint/js": "^9.32.0",
     "@expo/ngrok": "^4.1.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
+    "@types/jest": "30.0.0",
     "@types/node": "^26.6.4",
     "@types/react": "~19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
@@ -49,11 +52,16 @@
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.14",
     "prettier": "^3.6.2",
     "react-native-svg-transformer": "^1.5.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.1",
     "yarnhook": "^0.6.2"
+  },
+  "jest": {
+    "preset": "jest-expo"
   },
   "private": true
 }
