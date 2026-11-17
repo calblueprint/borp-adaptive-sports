@@ -3,6 +3,7 @@ import colors from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
 export default StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.white },
   page: { backgroundColor: colors.white },
   content: { padding: 16, gap: 16 },
   search: {

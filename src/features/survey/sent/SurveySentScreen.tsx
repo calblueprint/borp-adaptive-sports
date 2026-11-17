@@ -26,13 +26,17 @@ export default function SurveySentScreen() {
             <CheckLarge width={40} height={40} color={colors.white} />
           </View>
           <View style={styles.heroText}>
-            <Text style={styles.title}>Thanks, {name}!</Text>
+            <Text style={styles.title} accessibilityRole="header">
+              Thanks, {name}!
+            </Text>
             <Text style={styles.subtitle}>Your survey is with BORP.</Text>
           </View>
         </View>
 
         <View style={styles.next}>
-          <Text style={styles.nextHeading}>What happens next</Text>
+          <Text style={styles.nextHeading} accessibilityRole="header">
+            What happens next
+          </Text>
 
           <View style={styles.steps}>
             <View style={styles.step}>

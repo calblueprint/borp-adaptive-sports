@@ -1,11 +1,14 @@
+import type { LocalPhoto } from '@/lib/photos';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
+import PhotoPicker from '@/components/PhotoPicker/PhotoPicker';
 import Question from '@/components/Question/Question';
 import { useAuth } from '@/features/auth/AuthProvider';
+import Camera from '@/icons/camera.svg';
 import {
   Answers,
   AnswerValue,
@@ -17,6 +20,7 @@ import {
 } from '@/lib/survey';
 import { saveDraftSurvey, submitSurvey } from '~/api/supabase/queries/surveys';
 import PinsScreen from './PinsScreen';
+import { uploadSurveyPhotos } from '~/api/supabase/queries/photos';
 import styles from './styles';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
@@ -49,6 +53,8 @@ export default function SurveyScreen() {
   const [step, setStep] = useState<'form' | 'pins' | 'review'>('form');
   const [surveyId, setSurveyId] = useState<string | null>(null);
   const [pinCount, setPinCount] = useState(0);
+  const [photos, setPhotos] = useState<Record<string, LocalPhoto[]>>({});
+  const [openPhotos, setOpenPhotos] = useState<Record<string, boolean>>({});
 
   const setAnswer = (q: QuestionData, value: AnswerValue) => {
     setSaved(false);
@@ -76,6 +82,7 @@ export default function SurveyScreen() {
     }
     setMessage('');
     setSaving(true);
+    
     try {
       if (!surveyId) {
         const id = await saveDraftSurvey(
@@ -102,6 +109,17 @@ export default function SurveyScreen() {
     try {
       await submitSurvey(toRow(answers), surveyId);
       setSaved(true);
+
+      const allPhotos = Object.values(photos).flat();
+
+      if (allPhotos.length > 0) {
+        const failed = await uploadSurveyPhotos(surveyId, allPhotos);
+        if (failed > 0)
+          Alert.alert(
+            'Survey sent',
+            `${failed} of ${allPhotos.length} photos couldn’t be uploaded.`,
+          );
+      }
       router.replace('/survey/sent');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not send survey.');
@@ -154,7 +172,12 @@ export default function SurveyScreen() {
 
           {Object.entries(sections).map(([sectionName, questions]) => (
             <View key={sectionName} style={styles.section}>
-              <Text style={styles.reviewSectionTitle}>{sectionName}</Text>
+              <Text
+                style={styles.reviewSectionTitle}
+                accessibilityRole="header"
+              >
+                {sectionName}
+              </Text>
               {questions.map(q => (
                 <View key={q.column} style={styles.reviewRow}>
                   <Text style={styles.reviewLabel}>{q.label}</Text>
@@ -163,6 +186,14 @@ export default function SurveyScreen() {
                   </Text>
                 </View>
               ))}
+              {(photos[sectionName]?.length ?? 0) > 0 && (
+                <View style={styles.reviewRow}>
+                  <Text style={styles.reviewLabel}>Photos</Text>
+                  <Text style={styles.reviewValue}>
+                    {photos[sectionName].length}
+                  </Text>
+                </View>
+              )}
             </View>
           ))}
           {message !== '' && <Text style={styles.message}>{message}</Text>}
@@ -190,7 +221,39 @@ export default function SurveyScreen() {
 
         {Object.entries(sections).map(([sectionName, questions]) => (
           <View key={sectionName} style={styles.section}>
-            <Text style={styles.sectionTitle}>{sectionName}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle} accessibilityRole="header">
+                {sectionName}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Add a photo of ${sectionName.toLowerCase()}`}
+                accessibilityState={{ expanded: !!openPhotos[sectionName] }}
+                onPress={() =>
+                  setOpenPhotos(prev => ({
+                    ...prev,
+                    [sectionName]: !prev[sectionName],
+                  }))
+                }
+                style={({ pressed }) => [
+                  styles.cameraButton,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Camera width={20} height={20} />
+              </Pressable>
+            </View>
+            {(openPhotos[sectionName] ||
+              (photos[sectionName]?.length ?? 0) > 0) && (
+              <View style={styles.photoPicker}>
+                <PhotoPicker
+                  photos={photos[sectionName] ?? []}
+                  onChange={next =>
+                    setPhotos(prev => ({ ...prev, [sectionName]: next }))
+                  }
+                />
+              </View>
+            )}
             {questions.map(q => (
               <Question
                 key={q.column}
