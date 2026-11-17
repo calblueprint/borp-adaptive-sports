@@ -19,6 +19,7 @@ const fieldChecks: Record<keyof Profile, (value: unknown) => boolean> = {
   phone_number: isStringOrNull,
   affiliation: isStringOrNull,
   mobility_device: isStringOrNull,
+  created_at: isString,
 };
 
 function isCachedProfile(value: unknown, userId: string): value is Profile {
