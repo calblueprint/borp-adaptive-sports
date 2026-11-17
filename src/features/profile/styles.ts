@@ -3,7 +3,8 @@ import colors from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
 export default StyleSheet.create({
-  content: { padding: 16, gap: 12, backgroundColor: colors.white },
+  safe: { flex: 1, backgroundColor: colors.white },
+  content: { padding: 16, paddingBottom: 120, gap: 12 },
   avatar: { width: 80, height: 80, borderRadius: 40 },
   name: { ...typography.h2, color: colors.black },
   meta: { ...typography.p2, color: colors.gray },
@@ -25,4 +26,5 @@ export default StyleSheet.create({
   chipText: { ...typography.p2, color: colors.black },
   chipTextSelected: { color: colors.white },
   footer: { padding: 16 },
+  logout: { marginTop: 24 },
 });

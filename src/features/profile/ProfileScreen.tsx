@@ -1,8 +1,12 @@
 import type { MySurvey } from '~/api/supabase/queries/surveys';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Button from '@/components/Button/Button';
+import Header from '@/components/Header/Header';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useSignOut } from '@/features/auth/useSignOut';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import { fetchMySurveys } from '~/api/supabase/queries/surveys';
 import fillerImage from '~/assets/bp-icon.png';
@@ -13,6 +17,7 @@ export default function ProfileScreen() {
   const { session } = useAuth();
   const { profile } = useProfile();
   const router = useRouter();
+  const { signOut, busy, error: signOutError } = useSignOut();
   const [surveys, setSurveys] = useState<MySurvey[]>([]);
   const [surveysError, setSurveysError] = useState<string | null>(null);
 
@@ -41,24 +46,44 @@ export default function ProfileScreen() {
     : '';
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <Image source={fillerImage} style={styles.avatar} />
-      <Text style={styles.name}>{profile?.name}</Text>
-      <Text style={styles.meta}>Volunteer since {since}</Text>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <Header />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Image source={fillerImage} style={styles.avatar} />
+        <Text style={styles.name}>{profile?.name}</Text>
+        <Text style={styles.meta}>Volunteer since {since}</Text>
 
-      <Text style={styles.heading}>How you go on trails</Text>
-      <Pressable onPress={() => router.push('/how-you-go')} style={styles.row}>
-        <Text style={styles.rowTitle}>
-          {profile?.mobility_device ?? 'Add yours'}
-        </Text>
-        <Text style={styles.meta}>Compare trails with your limits</Text>
-      </Pressable>
+        <Text style={styles.heading}>How you go on trails</Text>
+        <Pressable
+          onPress={() => router.push('/how-you-go')}
+          style={styles.row}
+        >
+          <Text style={styles.rowTitle}>
+            {profile?.mobility_device ?? 'Add yours'}
+          </Text>
+          <Text style={styles.meta}>Compare trails with your limits</Text>
+        </Pressable>
 
-      <Text style={styles.heading}>Surveys</Text>
-      {surveysError && <Text style={styles.error}>Error: {surveysError}</Text>}
-      {surveys.map(s => (
-        <SurveyRow key={s.id} survey={s} />
-      ))}
-    </ScrollView>
+        <Text style={styles.heading}>Surveys</Text>
+        {surveysError && (
+          <Text style={styles.error}>Error: {surveysError}</Text>
+        )}
+        {surveys.map(s => (
+          <SurveyRow key={s.id} survey={s} />
+        ))}
+
+        {signOutError && (
+          <Text style={styles.error} accessibilityRole="alert">
+            {signOutError}
+          </Text>
+        )}
+        <Button
+          text={busy ? 'Logging out…' : 'Log out'}
+          disabled={busy}
+          onPress={() => void signOut()}
+          style={styles.logout}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
