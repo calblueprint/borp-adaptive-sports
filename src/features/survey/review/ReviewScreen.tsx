@@ -75,7 +75,7 @@ export default function ReviewScreen() {
           <Text style={styles.title} accessibilityRole="header">
             No session in progress
           </Text>
-          <Link href="/trails" replace>
+          <Link href="/" replace>
             Choose a site
           </Link>
         </View>

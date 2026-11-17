@@ -30,7 +30,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="trails/index"
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (

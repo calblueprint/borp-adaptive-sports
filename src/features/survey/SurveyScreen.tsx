@@ -102,7 +102,7 @@ export default function SurveyScreen() {
           <Text style={styles.title} accessibilityRole="header">
             No site selected
           </Text>
-          <Link href="/trails" replace>
+          <Link href="/" replace>
             Choose a site
           </Link>
         </View>
