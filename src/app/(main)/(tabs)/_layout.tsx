@@ -54,10 +54,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile/how-you-go"
-        options={{ href: null, tabBarStyle: { display: 'none' } }}
-      />
     </Tabs>
   );
 }

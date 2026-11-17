@@ -39,3 +39,19 @@ export async function submitSurvey(
   });
   if (error) throw new Error(`Error submitting survey: ${error.message}`);
 }
+
+export type MySurvey = {
+  id: string;
+  status: string;
+  site: { name: string; lat: number; lng: number } | null;
+};
+
+export async function fetchMySurveys(userId: string): Promise<MySurvey[]> {
+  const { data, error } = await supabase
+    .from('surveys')
+    .select('id, status, site:sites(name, lat, lng)')
+    .eq('surveyor_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as MySurvey[];
+}

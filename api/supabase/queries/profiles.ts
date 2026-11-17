@@ -9,6 +9,7 @@ export type Profile = {
   role: 'surveyor' | 'admin';
   affiliation: string | null;
   mobility_device: string | null;
+  created_at: string;
 };
 
 export type ProfileDetails = Pick<
@@ -19,7 +20,9 @@ export type ProfileDetails = Pick<
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, email, role, phone_number, affiliation, mobility_device')
+    .select(
+      'id, name, email, role, phone_number, affiliation, mobility_device, created_at',
+    )
     .eq('id', userId)
     .maybeSingle<Profile>();
   if (error) throw error;
