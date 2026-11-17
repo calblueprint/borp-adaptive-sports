@@ -74,4 +74,4 @@ jobs:
       # Run Jest tests               #
       ################################
       - name: Run tests
-        run: pnpm test --passWithNoTests
+        run: pnpm exec jest --passWithNoTests
