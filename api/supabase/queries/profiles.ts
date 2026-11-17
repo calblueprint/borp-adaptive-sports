@@ -5,7 +5,9 @@ import supabase from '../client';
 export async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, name, email, role, phone_number, affiliation, mobility_device')
+    .select(
+      'id, name, email, role, phone_number, affiliation, mobility_device, created_at',
+    )
     .eq('id', userId)
     .maybeSingle();
   if (error) throw error;

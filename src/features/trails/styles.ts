@@ -1,11 +1,12 @@
 import { StyleSheet } from 'react-native';
 import colors from '@/styles/colors';
+import { tabBarClearance } from '@/styles/layout';
 import { typography } from '@/styles/typography';
 
 export default StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.white },
-  page: { flex: 1, backgroundColor: colors.white },
-  content: { padding: 16, gap: 16 },
+  page: { backgroundColor: colors.white },
+  content: { padding: 16, paddingBottom: tabBarClearance, gap: 16 },
   accountRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
