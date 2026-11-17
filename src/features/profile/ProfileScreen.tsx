@@ -1,8 +1,8 @@
 import type { MySurvey } from '~/api/supabase/queries/surveys';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import Button from '@/components/Button/Button';
 import Header from '@/components/Header/Header';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -23,20 +23,27 @@ export default function ProfileScreen() {
 
   const userId = session?.user.id;
 
-  useEffect(() => {
-    if (!userId) return;
-    let cancelled = false;
-    fetchMySurveys(userId)
-      .then(data => {
-        if (!cancelled) setSurveys(data);
-      })
-      .catch((e: Error) => {
-        if (!cancelled) setSurveysError(e.message);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+  // Tab screens stay mounted, so refetch each time Profile is opened
+  // (e.g. after sending a survey)
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+      let cancelled = false;
+      fetchMySurveys(userId)
+        .then(data => {
+          if (!cancelled) {
+            setSurveys(data);
+            setSurveysError(null);
+          }
+        })
+        .catch((e: Error) => {
+          if (!cancelled) setSurveysError(e.message);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }, [userId]),
+  );
 
   const since = profile
     ? new Date(profile.created_at).toLocaleDateString('en-US', {

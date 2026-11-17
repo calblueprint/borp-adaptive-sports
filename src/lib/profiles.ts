@@ -17,3 +17,15 @@ export type ProfileDetails = Pick<
   Profile,
   'name' | 'phone_number' | 'affiliation' | 'mobility_device'
 >;
+
+// Choices for profiles.mobility_device, shared by profile setup and
+// "How you go on trails" so both store the same values
+export const MOBILITY_OPTIONS = [
+  'Walking',
+  'Bike',
+  'Scooter',
+  'Manual chair',
+  'Power chair',
+  'Walker',
+  'Cane or crutches',
+];

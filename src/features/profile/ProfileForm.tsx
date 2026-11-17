@@ -1,12 +1,14 @@
 import { ReactNode, useState } from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import FormScreen from '@/components/FormScreen/FormScreen';
+import fieldStyles from '@/components/TextField/styles';
 import TextField from '@/components/TextField/TextField';
 import { useAuth } from '@/features/auth/AuthProvider';
 import authStyles from '@/features/auth/styles';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import { createProfile, updateProfile } from '~/api/supabase/queries/profiles';
+import MobilityChips from './MobilityChips';
 
 // Stores numbers as +<country code><number>; 10-digit numbers are assumed to be US.
 function normalizePhone(input: string): string | null {
@@ -25,8 +27,8 @@ export default function ProfileForm({ children }: { children?: ReactNode }) {
   const [name, setName] = useState(profile?.name ?? '');
   const [phoneNumber, setPhoneNumber] = useState(profile?.phone_number ?? '');
   const [affiliation, setAffiliation] = useState(profile?.affiliation ?? '');
-  const [mobilityDevice, setMobilityDevice] = useState(
-    profile?.mobility_device ?? '',
+  const [mobilityDevice, setMobilityDevice] = useState<string | null>(
+    profile?.mobility_device ?? null,
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export default function ProfileForm({ children }: { children?: ReactNode }) {
         name: name.trim(),
         phone_number: normalizedPhone,
         affiliation: affiliation.trim() || null,
-        mobility_device: mobilityDevice.trim() || null,
+        mobility_device: mobilityDevice,
       };
       if (profile) {
         await updateProfile(profile.id, details);
@@ -106,12 +108,15 @@ export default function ProfileForm({ children }: { children?: ReactNode }) {
         onChangeText={setAffiliation}
         editable={!busy}
       />
-      <TextField
-        label="Mobility device (optional)"
-        value={mobilityDevice}
-        onChangeText={setMobilityDevice}
-        editable={!busy}
-      />
+      <View style={fieldStyles.field}>
+        <Text style={fieldStyles.label}>How you go on trails (optional)</Text>
+        <MobilityChips
+          value={mobilityDevice}
+          onChange={setMobilityDevice}
+          clearable
+          disabled={busy}
+        />
+      </View>
       {error && (
         <Text style={authStyles.error} accessibilityRole="alert">
           {error}

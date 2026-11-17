@@ -1,22 +1,13 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
 import { useProfile } from '@/features/profile/ProfileProvider';
 import { updateProfile } from '~/api/supabase/queries/profiles';
+import MobilityChips from './MobilityChips';
 import styles from './styles';
-
-const OPTIONS = [
-  'Walking',
-  'Bike',
-  'Scooter',
-  'Manual chair',
-  'Power chair',
-  'Walker',
-  'Cane or crutches',
-];
 
 export default function HowYouGoScreen() {
   const { profile, reload } = useProfile();
@@ -53,24 +44,7 @@ export default function HowYouGoScreen() {
       <View style={styles.screen}>
         <BackButton />
         <Text style={styles.heading}>How you go on trails</Text>
-        <View style={styles.chips}>
-          {OPTIONS.map(option => (
-            <Pressable
-              key={option}
-              onPress={() => setChoice(option)}
-              style={[styles.chip, choice === option && styles.chipSelected]}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  choice === option && styles.chipTextSelected,
-                ]}
-              >
-                {option}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <MobilityChips value={choice} onChange={setChoice} disabled={busy} />
         {error && <Text style={styles.error}>{error}</Text>}
         <View style={styles.footer}>
           <Button
