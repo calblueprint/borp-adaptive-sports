@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
 import colors from '@/styles/colors';
+import { tabBarClearance } from '@/styles/layout';
 import { typography } from '@/styles/typography';
 
 export default StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.white },
-  content: { padding: 16, paddingBottom: 120, gap: 12 },
+  content: { padding: 16, paddingBottom: tabBarClearance, gap: 12 },
   avatar: { width: 80, height: 80, borderRadius: 40 },
   name: { ...typography.h2, color: colors.black },
   meta: { ...typography.p2, color: colors.gray },
@@ -15,7 +16,13 @@ export default StyleSheet.create({
   surveyRow: { flexDirection: 'row', gap: 12, paddingVertical: 8 },
   thumb: { width: 64, height: 64, borderRadius: 12 },
   surveyText: { flex: 1, gap: 2 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, padding: 16 },
+  screen: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingVertical: 16,
+  },
   chip: {
     backgroundColor: colors.lightGray,
     borderRadius: 999,
@@ -25,6 +32,6 @@ export default StyleSheet.create({
   chipSelected: { backgroundColor: colors.navy },
   chipText: { ...typography.p2, color: colors.black },
   chipTextSelected: { color: colors.white },
-  footer: { padding: 16 },
+  footer: { paddingVertical: 16 },
   logout: { marginTop: 24 },
 });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
@@ -38,7 +39,8 @@ export default function HowYouGoScreen() {
         mobility_device: choice,
       });
       await reload();
-      router.replace('/profile');
+      // Profile reads from ProfileProvider, so reload() already updated it
+      router.back();
     } catch {
       setError('Could not save. Please try again.');
     } finally {
@@ -47,35 +49,37 @@ export default function HowYouGoScreen() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <BackButton />
-      <Text style={styles.heading}>How you go on trails</Text>
-      <View style={styles.chips}>
-        {OPTIONS.map(option => (
-          <Pressable
-            key={option}
-            onPress={() => setChoice(option)}
-            style={[styles.chip, choice === option && styles.chipSelected]}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                choice === option && styles.chipTextSelected,
-              ]}
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.screen}>
+        <BackButton />
+        <Text style={styles.heading}>How you go on trails</Text>
+        <View style={styles.chips}>
+          {OPTIONS.map(option => (
+            <Pressable
+              key={option}
+              onPress={() => setChoice(option)}
+              style={[styles.chip, choice === option && styles.chipSelected]}
             >
-              {option}
-            </Text>
-          </Pressable>
-        ))}
+              <Text
+                style={[
+                  styles.chipText,
+                  choice === option && styles.chipTextSelected,
+                ]}
+              >
+                {option}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        {error && <Text style={styles.error}>{error}</Text>}
+        <View style={styles.footer}>
+          <Button
+            text={busy ? 'Saving…' : 'Save'}
+            onPress={() => void save()}
+            disabled={busy || !choice}
+          />
+        </View>
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
-      <View style={styles.footer}>
-        <Button
-          text={busy ? 'Saving…' : 'Save'}
-          onPress={() => void save()}
-          disabled={busy || !choice}
-        />
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -2,6 +2,7 @@ import { Image, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import HouseIcon from '@/icons/house.svg';
 import colors from '@/styles/colors';
+import { tabBar } from '@/styles/layout';
 import avatar from '~/assets/bp-icon.png';
 
 export default function TabsLayout() {
@@ -12,13 +13,13 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 33,
+          bottom: tabBar.bottom,
           alignSelf: 'center',
           backgroundColor: colors.glass,
           borderColor: colors.glassBorder,
           borderWidth: 1,
           borderRadius: 999,
-          height: 54,
+          height: tabBar.height,
           width: 140,
           shadowColor: colors.black,
           shadowOffset: { width: 0, height: 4 },
