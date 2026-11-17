@@ -1,7 +1,7 @@
 // The floating pill tab bar in (main)/(tabs). It sits over the screen, so
 // scrolling tab screens need bottom padding to keep their last items visible.
 export const tabBar = {
-  height: 54,
+  height: 56,
   bottom: 33,
 };
 
