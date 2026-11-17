@@ -20,8 +20,8 @@ import {
 } from '@/lib/survey';
 import { uploadSurveyPhotos } from '~/api/supabase/queries/photos';
 import { saveDraftSurvey, submitSurvey } from '~/api/supabase/queries/surveys';
-import PinsScreen from './PinsScreen';
 import styles from './styles';
+import { useSurvey } from './SurveyProvider';
 
 const sections = questionList.reduce<Record<string, QuestionData[]>>(
   (groups, q) => {
@@ -50,9 +50,7 @@ export default function SurveyScreen() {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [step, setStep] = useState<'form' | 'pins' | 'review'>('form');
-  const [surveyId, setSurveyId] = useState<string | null>(null);
-  const [pinCount, setPinCount] = useState(0);
+  const { surveyId, setSurveyId, step, setStep } = useSurvey();
   const [photos, setPhotos] = useState<Record<string, LocalPhoto[]>>({});
   const [openPhotos, setOpenPhotos] = useState<Record<string, boolean>>({});
 
@@ -92,7 +90,7 @@ export default function SurveyScreen() {
         );
         setSurveyId(id);
       }
-      setStep('pins');
+      router.push('/survey/session');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not start survey.');
     } finally {
@@ -145,25 +143,16 @@ export default function SurveyScreen() {
     );
   }
 
-  if (step === 'pins' && surveyId) {
-    return (
-      <PinsScreen
-        surveyId={surveyId}
-        pinCount={pinCount}
-        onPinAdded={() => setPinCount(c => c + 1)}
-        onBack={() => setStep('form')}
-        onFinish={() => setStep('review')}
-      />
-    );
-  }
-
   if (step === 'review') {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container}>
           <BackButton
             style={styles.backButton}
-            onPress={() => setStep('pins')}
+            onPress={() => {
+              setStep('form');
+              router.push('/survey/session');
+            }}
           />
           <Text style={styles.eyebrow}>{siteName ?? 'Trail survey'}</Text>
           <Text style={styles.title} accessibilityRole="header">

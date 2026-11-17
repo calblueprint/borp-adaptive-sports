@@ -2,7 +2,7 @@ import type { SurveyAnswersRow } from '@/lib/survey';
 import supabase from '../client';
 
 // Creates the survey as a draft once the pre-survey is finished and
-// returns its id, so pins (survey_items) can link to it
+// returns its id, so session items (survey_items) can link to it
 export async function saveDraftSurvey(
   row: SurveyAnswersRow,
   userId: string,

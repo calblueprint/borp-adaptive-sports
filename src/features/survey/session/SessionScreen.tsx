@@ -7,12 +7,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link, useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton/BackButton';
 import Button from '@/components/Button/Button';
 import { addSurveyItem } from '~/api/supabase/queries/surveys';
-import styles from './pinsStyles';
+import { useSurvey } from '../SurveyProvider';
+import styles from './styles';
 
-const PIN_TYPES = [
+const ITEM_TYPES = [
   { value: 'narrow_spot', label: 'Narrow spot' },
   { value: 'steep_stretch', label: 'Steep stretch' },
   { value: 'tilted_path', label: 'Tilted path' },
@@ -21,33 +23,22 @@ const PIN_TYPES = [
   { value: 'something_else', label: 'Something else' },
 ];
 
-type Props = {
-  surveyId: string;
-  pinCount: number;
-  onPinAdded: () => void;
-  onBack: () => void;
-  onFinish: () => void;
-};
-
-export default function PinsScreen({
-  surveyId,
-  pinCount,
-  onPinAdded,
-  onBack,
-  onFinish,
-}: Props) {
+export default function SessionScreen() {
+  const router = useRouter();
+  const { surveyId, itemCount, addItem, setStep } = useSurvey();
   const [notes, setNotes] = useState('');
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
 
-  const handlePin = async (type: string, label: string) => {
+  const handleAddItem = async (type: string, label: string) => {
+    if (!surveyId) return;
     setAdding(true);
     setMessage('');
     try {
       await addSurveyItem(surveyId, type, notes);
-      onPinAdded();
+      addItem();
       setNotes('');
-      setMessage(`Pin ${pinCount + 1} saved: ${label}`);
+      setMessage(`Pin ${itemCount + 1} saved: ${label}`);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not save pin.');
     } finally {
@@ -55,22 +46,44 @@ export default function PinsScreen({
     }
   };
 
+  const handleFinish = () => {
+    setStep('review');
+    router.back();
+  };
+
+  // Only reachable through a bad link; a session always starts from the form
+  if (!surveyId) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.container}>
+          <BackButton />
+          <Text style={styles.title} accessibilityRole="header">
+            No session in progress
+          </Text>
+          <Link href="/trails" replace>
+            Choose a site
+          </Link>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <BackButton onPress={onBack} />
+        <BackButton />
         <Text style={styles.eyebrow}>Trail session</Text>
         <Text style={styles.title} accessibilityRole="header">
-          What’s here? Pin {pinCount + 1}
+          What’s here? Pin {itemCount + 1}
         </Text>
 
         <View style={styles.grid}>
-          {PIN_TYPES.map(t => (
+          {ITEM_TYPES.map(t => (
             <TouchableOpacity
               key={t.value}
               style={styles.typeButton}
               disabled={adding}
-              onPress={() => void handlePin(t.value, t.label)}
+              onPress={() => void handleAddItem(t.value, t.label)}
             >
               <Text style={styles.typeButtonText}>{t.label}</Text>
             </TouchableOpacity>
@@ -88,7 +101,7 @@ export default function PinsScreen({
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button text="Finish" onPress={onFinish} disabled={adding} />
+        <Button text="Finish" onPress={handleFinish} disabled={adding} />
       </View>
     </SafeAreaView>
   );
