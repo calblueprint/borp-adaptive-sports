@@ -56,11 +56,9 @@ export default StyleSheet.create({
   image: { width: '100%', height: 200, borderRadius: 20 },
   name: { ...typography.p1, fontWeight: '600', color: colors.black },
   meta: { ...typography.p2, color: colors.gray },
-  backdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
+  backdrop: { flex: 1, justifyContent: 'flex-end' },
+  // Fades in and out separately from the sheet (see SiteSheet)
+  scrim: { backgroundColor: 'rgba(0, 0, 0, 0.4)' },
   sheet: {
     width: '100%',
     maxWidth: 560,

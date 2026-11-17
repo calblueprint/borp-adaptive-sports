@@ -1,7 +1,7 @@
 import type { SiteFormValues } from '@/lib/siteForm';
 import type { Site } from '@/lib/sites';
 import type { TextInputProps } from 'react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
   Platform,
@@ -28,6 +28,7 @@ type AddSiteFormProps = {
   onCreated: (site: Site) => void;
   saving: boolean;
   onSavingChange: (saving: boolean) => void;
+  onDirtyChange: (dirty: boolean) => void;
 };
 
 type FieldProps = TextInputProps & {
@@ -66,6 +67,7 @@ export default function AddSiteForm({
   onCreated,
   saving,
   onSavingChange,
+  onDirtyChange,
 }: AddSiteFormProps) {
   const { session } = useAuth();
   const [values, setValues] = useState<SiteFormValues>(EMPTY_SITE_FORM);
@@ -76,6 +78,11 @@ export default function AddSiteForm({
   const submitting = useRef(false);
   const errors = validateSiteForm(values);
   const valid = Object.keys(errors).length === 0;
+  const dirty = Object.values(values).some(value => value.trim() !== '');
+
+  useEffect(() => {
+    onDirtyChange(dirty);
+  }, [dirty, onDirtyChange]);
 
   function change(field: keyof SiteFormValues, value: string) {
     setValues(previous => ({ ...previous, [field]: value }));
@@ -93,7 +100,15 @@ export default function AddSiteForm({
   }
 
   async function submit() {
-    if (submitting.current || !valid) return;
+    if (submitting.current) return;
+    if (!valid) {
+      const allTouched: Partial<Record<keyof SiteFormValues, boolean>> = {};
+      for (const field of Object.keys(values) as (keyof SiteFormValues)[])
+        allTouched[field] = true;
+      setTouched(allTouched);
+      setMessage('Fix the highlighted fields before adding this trail.');
+      return;
+    }
     if (!session) {
       setMessage('Please sign in before adding a trail.');
       return;
@@ -270,7 +285,7 @@ export default function AddSiteForm({
         )}
         <Button
           text={saving ? 'Adding trail…' : 'Add trail'}
-          disabled={saving || !valid}
+          disabled={saving}
           onPress={() => void submit()}
         />
       </View>
