@@ -15,11 +15,14 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import Button from '@/components/Button/Button';
+import { directionsUrl, parseGeometry } from '@/lib/trailGeometry';
 import fillerImage from '~/assets/bp-icon.png';
 import AddSiteForm from './AddSiteForm';
 import styles from './styles';
+import TrailMap from './TrailMap';
 
 type SiteSheetProps = {
   site: Site | null;
@@ -110,6 +113,15 @@ export default function SiteSheet({
     });
   }
 
+  function openDirections() {
+    if (!shown.site) return;
+    Linking.openURL(directionsUrl(shown.site.lat, shown.site.lng)).catch(() =>
+      Alert.alert('Could not open maps', 'Try again in a moment.'),
+    );
+  }
+
+  const geometry = parseGeometry(shown.site?.geometry ?? null);
+
   const sheetOffset = progress.interpolate({
     inputRange: [0, 1],
     outputRange: [height, 0],
@@ -159,11 +171,26 @@ export default function SiteSheet({
             />
           ) : shown.site ? (
             <>
-              <Image source={fillerImage} style={styles.sheetImage} />
+              {geometry ? (
+                <TrailMap geometry={geometry} marker={shown.site} />
+              ) : (
+                <Image source={fillerImage} style={styles.sheetImage} />
+              )}
               <Text style={styles.sheetName} accessibilityRole="header">
                 {shown.site.name}
               </Text>
               <Button text="Start survey" onPress={startSurvey} />
+              <Button
+                text="Get directions"
+                variant="secondary"
+                onPress={openDirections}
+              />
+              {shown.site.osm_id !== null && (
+                // Required by the OpenStreetMap data license (ODbL)
+                <Text style={styles.attribution}>
+                  Trail data © OpenStreetMap contributors
+                </Text>
+              )}
               <Pressable
                 accessibilityRole="button"
                 style={styles.close}

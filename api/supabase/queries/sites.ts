@@ -1,11 +1,10 @@
 import type { CreateSiteInput } from '@/lib/siteForm';
 import type { Site } from '@/lib/sites';
+import { SITE_COLUMNS } from '@/lib/sites';
 import supabase from '../client';
 
 export async function fetchSites(): Promise<Site[]> {
-  const { data, error } = await supabase
-    .from('sites')
-    .select('id, name, lat, lng');
+  const { data, error } = await supabase.from('sites').select(SITE_COLUMNS);
   if (error) throw error;
   return data ?? [];
 }
@@ -19,7 +18,7 @@ export async function createSite(
   const { data, error } = await supabase
     .from('sites')
     .insert({ ...input, created_by: userId })
-    .select('id, name, lat, lng')
+    .select(SITE_COLUMNS)
     .single();
 
   if (error?.code === '42501')

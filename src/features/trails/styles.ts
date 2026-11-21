@@ -75,4 +75,9 @@ export default StyleSheet.create({
   sheetName: { ...typography.h3, color: colors.black },
   close: { alignSelf: 'center', padding: 8 },
   closeText: { ...typography.p2, color: colors.gray },
+  attribution: {
+    ...typography.p3,
+    color: colors.textTertiary,
+    textAlign: 'center',
+  },
 });
