@@ -1,6 +1,12 @@
 import type { Tables } from '~/api/supabase/database.types';
 
-export type Site = Pick<Tables<'sites'>, 'id' | 'name' | 'lat' | 'lng'>;
+export type Site = Pick<
+  Tables<'sites'>,
+  'id' | 'name' | 'lat' | 'lng' | 'geometry' | 'osm_id'
+>;
+
+// Columns every Site query selects, so all queries return the same shape
+export const SITE_COLUMNS = 'id, name, lat, lng, geometry, osm_id';
 
 // Matches "lat, lng", e.g. "37.87, -122.27"
 const COORDS = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/;
